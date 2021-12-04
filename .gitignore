@@ -25,3 +25,5 @@ hs_err_pid*
 bin/
 jars/
 .idea/
+lib/
+out/
