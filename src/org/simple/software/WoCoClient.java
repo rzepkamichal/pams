@@ -148,34 +148,34 @@ public class WoCoClient {
 	 */
 	public void printStats(boolean withPercentiles) {
 		long currTime = System.nanoTime();
-		
+
 		float elapsedSeconds = (float) ((currTime-timeLastPrint)/1000000000.0);
-		
+
 		if (elapsedSeconds<1 && withPercentiles==false) {
 			return;
 		}
-		
+
 		float tput = cntSincePrint/elapsedSeconds;
 		System.out.println("Interval time [s], Throughput [ops/s]: "+elapsedSeconds + ", "+ tput);
 		timeLastPrint = currTime;
 		cntSincePrint = 0;
-		
-		
+
+
 		if (withPercentiles) {
 			//sorting for pctiles
 			Collections.sort(respTime);
-			
+
 			System.out.println("-----");
-			
+
 			elapsedSeconds = (float) ((currTime-timeCreate)/1000000000.0);
 			tput = respTime.size()/elapsedSeconds;
 			System.out.println("Total time [s], Throughput [ops/s]: "+elapsedSeconds + ", "+ tput);
-			
+
 			System.out.print("Response time percentiles [ms]: ");
 			System.out.print("\n");
-			for (int p=1; p<=100; p++) {
-				System.out.print(p+","+respTime.get(respTime.size()*p/100-1));
-				if (p!=100) {
+			for (int p = 1; p <= 100; p++) {
+				System.out.print(p + "," + respTime.get((int) Math.ceil(respTime.size() * p / 100.0) - 1));
+				if (p != 100) {
 					System.out.print("\n");
 				}
 			}
