@@ -17,8 +17,8 @@ public class WoCoJob {
     private Consumer<Long> tagRemovalTimeLogListener = __ -> {};
     private Consumer<Long> wordCountTimeLogListener = __ -> {};
 
-    public WoCoJob(int clientId, JobDataProvider dataProvider, TagRemover tagRemover, WordCounter wordCounter) {
-        this.clientId = clientId;
+    public WoCoJob(JobDataProvider dataProvider, TagRemover tagRemover, WordCounter wordCounter) {
+        this.clientId = dataProvider.getClientId();
         this.document = dataProvider.getData();
         this.tagRemover = tagRemover;
         this.wordCounter = wordCounter;

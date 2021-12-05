@@ -23,6 +23,9 @@ class WoCoJobTest {
     @Mock
     WordCounter wordCounter;
 
+    @Mock
+    JobDataProvider jobData;
+
     WoCoResult result;
 
     @BeforeEach
@@ -47,7 +50,9 @@ class WoCoJobTest {
     @Test
     void removes_tags_and_counts_words() {
         List<WoCoResult> results = new LinkedList<>();
-        WoCoJob job = new WoCoJob(1, () -> DOCUMENT, tagRemover, wordCounter);
+        when(jobData.getClientId()).thenReturn(1);
+        when(jobData.getData()).thenReturn(DOCUMENT);
+        WoCoJob job = new WoCoJob(jobData, tagRemover, wordCounter);
         job.setOnComplete(results::add);
 
         job.execute();
@@ -61,7 +66,9 @@ class WoCoJobTest {
     void notifies_about_time_log() {
         List<Long> tagRemovalLogs = new LinkedList<>();
         List<Long> wordCountLogs = new LinkedList<>();
-        WoCoJob job = new WoCoJob(1, () -> DOCUMENT, tagRemover, wordCounter);
+        when(jobData.getClientId()).thenReturn(1);
+        when(jobData.getData()).thenReturn(DOCUMENT);
+        WoCoJob job = new WoCoJob(jobData, tagRemover, wordCounter);
         job.setTagRemovalTimeLogListener(tagRemovalLogs::add);
         job.setWordCountTimeLogListener(wordCountLogs::add);
 

@@ -1,7 +1,7 @@
 package org.simple.software.server.core;
 
-@FunctionalInterface
 public interface JobDataProvider {
 
+    int getClientId();
     String getData();
 }
