@@ -1,5 +1,6 @@
 package org.simple.software;
 
+import org.simple.software.server.core.JobExecutor;
 import org.simple.software.server.core.ResultSerializer;
 import org.simple.software.server.core.TagRemover;
 import org.simple.software.server.core.TagRemoverImpl;
@@ -7,6 +8,7 @@ import org.simple.software.server.core.WoCoJob;
 import org.simple.software.server.core.WoCoResult;
 import org.simple.software.server.core.WordCounter;
 import org.simple.software.server.core.WordCounterImpl;
+import org.simple.software.server.infrastructure.ThreadedJobExecutor;
 import org.simple.software.server.protocol.RequestRepo;
 import org.simple.software.server.protocol.RequestRepoImpl;
 import org.simple.software.server.protocol.WoCoRequest;
@@ -36,6 +38,11 @@ public class WoCoServer {
     private final ResultSerializer serializer = new WoCoResultSerializer();
     private final ProcessingStatsRepo statsRepo = new StatsRepoImpl();
     private final StatsWriter statsWriter = new SystemOutAvgStatsWriter(statsRepo);
+    private final JobExecutor jobExecutor;
+
+    public WoCoServer(int threadNum) {
+        this.jobExecutor = new ThreadedJobExecutor(threadNum);
+    }
 
 
     public static void main(String[] args) throws IOException {
@@ -57,14 +64,7 @@ public class WoCoServer {
 
         }
 
-        if (threadCount > 1) {
-            //TODO: will have to implement multithreading
-            System.out.println("FEATURE NOT IMPLEMENTED");
-            System.exit(0);
-
-        }
-
-        WoCoServer server = new WoCoServer();
+        WoCoServer server = new WoCoServer(threadCount);
         server.run(lAddr, lPort);
     }
 
@@ -115,7 +115,7 @@ public class WoCoServer {
                         if (request.isDataReady()) {
                             pendingRequestRepo.removeByClientId(clientId);
                             WoCoJob job = createJob(request, client);
-                            job.execute();
+                            jobExecutor.execute(job);
                         }
 
                     } else {
