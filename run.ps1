@@ -9,6 +9,6 @@ for ($num = 1; $num -le $clients; $num++) {
     $outPath = ".\log\console" + $num + ".out"
     $errPath = ".\log\console" + $num + ".err"
 
-    Start-Process -NoNewWindow java -ArgumentList '-jar', 'jars\WoCoClient.jar', 'localhost', '8080', '1', '2', '1' `
+    Start-Process -NoNewWindow java -ArgumentList '-jar', 'jars\WoCoClient.jar', 'localhost', '8080', '200', '1', '1' `
     -RedirectStandardOutput $outPath -RedirectStandardError $errPath
 }
