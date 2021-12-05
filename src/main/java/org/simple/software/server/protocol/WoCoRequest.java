@@ -6,6 +6,7 @@ import org.simple.software.server.core.JobDataProvider;
 import java.io.IOException;
 import java.time.Clock;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class WoCoRequest implements JobDataProvider {
 
@@ -13,6 +14,8 @@ public class WoCoRequest implements JobDataProvider {
     private final StringBuilder buffer = new StringBuilder();
     private boolean requestSeparatorReceived = false;
     private final long creationTime = Clock.systemDefaultZone().millis();
+
+    private Consumer<Long> receiveDurationListener = __ -> {};
 
     /**
      * Data which was sent after a request separator and so begins a new request
@@ -82,9 +85,14 @@ public class WoCoRequest implements JobDataProvider {
 
         buffer.deleteCharAt(indexNL);
         requestSeparatorReceived = true;
+        receiveDurationListener.accept(Clock.systemDefaultZone().millis() - creationTime);
     }
 
     public Optional<String> getRemainingData() {
         return Optional.ofNullable(remainingData);
+    }
+
+    public void setReceiveDurationListener(Consumer<Long> receiveDurationListener) {
+        this.receiveDurationListener = receiveDurationListener;
     }
 }

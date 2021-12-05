@@ -18,4 +18,9 @@ public class RequestRepoImpl implements RequestRepo {
         requests.put(req.getClientId(), req);
         return req;
     }
+
+    @Override
+    public void removeByClientId(int clientId) {
+        requests.remove(clientId);
+    }
 }
