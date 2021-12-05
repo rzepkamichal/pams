@@ -10,7 +10,7 @@ public class RequestRepoImpl implements RequestRepo {
 
     @Override
     public Optional<WoCoRequest> getByClientId(int clientId) {
-        return Optional.of(requests.get(clientId));
+        return Optional.ofNullable(requests.get(clientId));
     }
 
     @Override
