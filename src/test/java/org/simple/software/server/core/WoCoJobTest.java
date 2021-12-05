@@ -34,9 +34,11 @@ class WoCoJobTest {
                 .thenReturn(WITHOUT_TAGS);
 
         result = new WoCoResult();
-        result.addSingleResult("asd", 2);
-        result.addSingleResult("hijk", 2);
-        result.addSingleResult("efg", 1);
+        result.addSingleResult("asd");
+        result.addSingleResult("hijk");
+        result.addSingleResult("asd");
+        result.addSingleResult("hijk");
+        result.addSingleResult("efg");
 
         when(wordCounter.countWords(WITHOUT_TAGS))
                 .thenReturn(result);
