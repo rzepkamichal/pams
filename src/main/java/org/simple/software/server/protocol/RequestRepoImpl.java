@@ -14,7 +14,8 @@ public class RequestRepoImpl implements RequestRepo {
     }
 
     @Override
-    public void save(WoCoRequest req) {
+    public WoCoRequest save(WoCoRequest req) {
         requests.put(req.getClientId(), req);
+        return req;
     }
 }

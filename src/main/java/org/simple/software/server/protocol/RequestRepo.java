@@ -5,5 +5,5 @@ import java.util.Optional;
 public interface RequestRepo {
 
     Optional<WoCoRequest> getByClientId(int clientId);
-    void save(WoCoRequest req);
+    WoCoRequest save(WoCoRequest req);
 }
