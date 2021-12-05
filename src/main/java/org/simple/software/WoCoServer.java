@@ -40,7 +40,7 @@ public class WoCoServer {
     public static final boolean PRINT_CLIENT_STATS = true;
 
     private final RequestRepo pendingRequestRepo = new RequestRepoImpl();
-    private final TagRemover tagRemover = new TagRemoverImpl();
+    private final TagRemover tagRemover;
     private final WordCounter wordCounter = new WordCounterImpl();
     private final ResultSerializer serializer = new WoCoResultSerializer();
     private final ProcessingStatsRepo statsRepo = new StatsRepoImpl();
@@ -50,8 +50,11 @@ public class WoCoServer {
 
     private final Set<Integer> servicedClients = new HashSet<>();
 
-    public WoCoServer(int threadNum) {
+    public WoCoServer(int threadNum, boolean removeTags) {
         this.jobExecutor = new ThreadedJobExecutor(threadNum);
+
+        // if tag removal disabled, then use just a default "input repeater"
+        this.tagRemover = removeTags ? new TagRemoverImpl() : str -> str;
     }
 
 
@@ -67,14 +70,7 @@ public class WoCoServer {
         boolean cMode = Boolean.parseBoolean(args[2]);
         int threadCount = Integer.parseInt(args[3]);
 
-        if (cMode == true) {
-            //TODO: will have to implement cleaning from HTML tags
-            System.out.println("FEATURE NOT IMPLEMENTED");
-            System.exit(0);
-
-        }
-
-        WoCoServer server = new WoCoServer(threadCount);
+        WoCoServer server = new WoCoServer(threadCount, cMode);
         server.run(lAddr, lPort);
     }
 
