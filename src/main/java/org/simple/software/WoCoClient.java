@@ -28,6 +28,48 @@ public class WoCoClient {
 	private long timeLastPrint;
 	private long timeCreate;
 	private static boolean DEBUG = false;
+
+	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
+
+		//reading in parameters
+		if (args.length<5) {
+			System.out.println("Usage: <servername> <serverport> <documentsize(KiB)> <opcount(x1000)> <filesuffix> [<seed>]");
+			System.exit(0);
+		}
+
+		String sName = args[0];
+		int sPort = Integer.parseInt(args[1]);
+		float dSize = Float.parseFloat(args[2])*1024;
+		int ops = Integer.parseInt(args[3])*1000;
+		int file = Integer.parseInt(args[4]);
+		int seed = (args.length==6) ? Integer.parseInt(args[5]) : (int) (Math.random()*10000);
+
+		//We generate one document for the entire runtime of this client
+		//Otherwise the client would spend too much time generating new inputs.
+		String docu = WoCoClient.generateDocument((int) (dSize), file, seed);
+		WoCoClient client = new WoCoClient(sName, sPort);
+
+		//send requests to the server in a loop.
+		for (int rep=0; rep<ops; rep++) {
+			HashMap<String, Integer> result = client.getWordCount(docu);
+
+			if (DEBUG==true) {
+				System.out.println(result);
+			}
+
+			if (rep%25 == 0) {
+				//reduce the overhead of printing statistics by calling this less often
+				client.printStats(false);
+			}
+		}
+
+		//final printout with percentiles
+		client.printStats(true);
+		Thread.sleep(2000);
+		client.shutDown();
+
+		System.exit(0);
+	}
 	
 	/**
 	 * Function to generate a document based on the hardcoded example file. 
@@ -194,52 +236,6 @@ public class WoCoClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	
-
-	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
-		
-		//reading in parameters
-		if (args.length<5) {
-			System.out.println("Usage: <servername> <serverport> <documentsize(KiB)> <opcount(x1000)> <filesuffix> [<seed>]");
-			System.exit(0);
-		}
-		
-		String sName = args[0];
-		int sPort = Integer.parseInt(args[1]);
-		float dSize = Float.parseFloat(args[2])*1024;
-		int ops = Integer.parseInt(args[3])*1000;
-		int file = Integer.parseInt(args[4]);
-		int seed = (args.length==6) ? Integer.parseInt(args[5]) : (int) (Math.random()*10000);
-		
-		//We generate one document for the entire runtime of this client
-		//Otherwise the client would spend too much time generating new inputs.
-    	String docu = WoCoClient.generateDocument((int) (dSize), file, seed);    	
-		WoCoClient client = new WoCoClient(sName, sPort);    	
-    	
-    	//send requests to the server in a loop.    	
-		for (int rep=0; rep<ops; rep++) {
-			HashMap<String, Integer> result = client.getWordCount(docu);
-			
-			if (DEBUG==true) {
-				System.out.println(result);
-			}
-			
-			if (rep%25 == 0) {
-				//reduce the overhead of printing statistics by calling this less often
-				client.printStats(false);
-			}
-		}
-				
-		//final printout with percentiles
-		client.printStats(true);
-		Thread.sleep(2000);
-		client.shutDown();
-
-        System.exit(0);
-
-
 	}
 
 }
