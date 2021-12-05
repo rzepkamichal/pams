@@ -16,6 +16,7 @@ import org.simple.software.server.stats.ProcessingStatsRepo;
 import org.simple.software.server.stats.StatsRepoImpl;
 import org.simple.software.server.stats.StatsWriter;
 import org.simple.software.server.stats.SystemOutAvgStatsWriter;
+import org.simple.software.server.stats.TimedRunner;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class WoCoServer {
 
@@ -98,7 +100,7 @@ public class WoCoServer {
 
                 } else if (key.isReadable()) {
                     SocketChannel client = (SocketChannel) key.channel();
-                    int clientId = client.hashCode();
+                    int clientId = getClientId(client);
 
                     WoCoRequest request = pendingRequestRepo.getByClientId(clientId).orElse(
                             pendingRequestRepo.save(createAndSaveRequest(clientId)));
@@ -126,8 +128,17 @@ public class WoCoServer {
         }
     }
 
+    private int getClientId(SocketChannel client) {
+        return client.hashCode();
+    }
+
+    private Consumer<WoCoResult> onResultCalculated(SocketChannel client) {
+        return result -> sendResultToClient(client, result);
+    }
+
     private void sendResultToClient(SocketChannel client, WoCoResult result) {
-        String response = serializer.serialize(result);
+        ProcessingStats clientStats = statsRepo.getStatsByClient(getClientId(client));
+        String response = TimedRunner.run(() -> serializer.serialize(result), clientStats::logSerializationTime);
 
         ByteBuffer ba = ByteBuffer.wrap(response.getBytes());
         try {
@@ -145,7 +156,7 @@ public class WoCoServer {
 
     private WoCoJob createJob(WoCoRequest request, SocketChannel client) {
         WoCoJob job = new WoCoJob(request, tagRemover, wordCounter);
-        job.setOnComplete(result -> sendResultToClient(client, result));
+        job.setOnComplete(onResultCalculated(client));
 
         ProcessingStats clientStats = statsRepo.getStatsByClient(request.getClientId());
         job.setTagRemovalTimeLogListener(clientStats::logDocCleaningTime);
