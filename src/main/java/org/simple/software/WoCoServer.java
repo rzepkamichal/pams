@@ -118,6 +118,7 @@ public class WoCoServer {
 
                     } else {
                         key.cancel();
+                        writeStatsForClient(clientId);
                     }
                 }
                 iterator.remove();
@@ -151,6 +152,10 @@ public class WoCoServer {
         job.setWordCountTimeLogListener(clientStats::logWordCountTime);
 
         return job;
+    }
+
+    private void writeStatsForClient(int clientId) {
+        statsWriter.writeForClient(clientId);
     }
 }
 
