@@ -20,7 +20,7 @@ public class WoCoRequest implements JobDataProvider {
     /**
      * Data which was sent after a request separator and so begins a new request
      */
-    private String remainingData;
+    private String remainingData = "";
 
     public WoCoRequest(int clientId, String initialDataChunk) {
         this.clientId = clientId;
@@ -88,8 +88,12 @@ public class WoCoRequest implements JobDataProvider {
         receiveDurationListener.accept(Clock.systemDefaultZone().millis() - creationTime);
     }
 
-    public Optional<String> getRemainingData() {
-        return Optional.ofNullable(remainingData);
+    public WoCoRequest fromRemainingData() {
+        if (!isDataReady()) {
+            throw new IllegalStateException("Request not yet ready. No remaining data.");
+        }
+
+        return new WoCoRequest(clientId, remainingData);
     }
 
     public void setReceiveDurationListener(Consumer<Long> receiveDurationListener) {

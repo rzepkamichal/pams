@@ -123,7 +123,7 @@ public class WoCoServer {
                         request.receiveData(dataChunk);
 
                         if (request.isDataReady()) {
-                            pendingRequestRepo.removeByClientId(clientId);
+                            pendingRequestRepo.save(request.fromRemainingData());
                             WoCoJob job = createJob(request, client);
                             jobRepo.save(job);
                             jobExecutor.execute(job);
