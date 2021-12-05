@@ -1,6 +1,8 @@
 package org.simple.software;
 
 import org.simple.software.server.core.JobExecutor;
+import org.simple.software.server.core.JobRepo;
+import org.simple.software.server.core.JobRepoImpl;
 import org.simple.software.server.core.ResultSerializer;
 import org.simple.software.server.core.TagRemover;
 import org.simple.software.server.core.TagRemoverImpl;
@@ -24,8 +26,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class WoCoServer {
@@ -39,6 +45,9 @@ public class WoCoServer {
     private final ProcessingStatsRepo statsRepo = new StatsRepoImpl();
     private final StatsWriter statsWriter = new SystemOutAvgStatsWriter(statsRepo);
     private final JobExecutor jobExecutor;
+    private final JobRepo jobRepo = new JobRepoImpl();
+
+    private final Set<Integer> servicedClients = new HashSet<>();
 
     public WoCoServer(int threadNum) {
         this.jobExecutor = new ThreadedJobExecutor(threadNum);
@@ -97,6 +106,7 @@ public class WoCoServer {
                     client.register(selector, SelectionKey.OP_READ);
 
                     System.out.println("Connection Accepted: " + client.getLocalAddress() + "\n");
+                    servicedClients.add(getClientId(client));
 
                 } else if (key.isReadable()) {
                     SocketChannel client = (SocketChannel) key.channel();
@@ -115,12 +125,19 @@ public class WoCoServer {
                         if (request.isDataReady()) {
                             pendingRequestRepo.removeByClientId(clientId);
                             WoCoJob job = createJob(request, client);
+                            jobRepo.save(job);
                             jobExecutor.execute(job);
                         }
 
                     } else {
                         key.cancel();
+                        pendingRequestRepo.removeByClientId(clientId);
+                        servicedClients.remove(clientId);
                         writeStatsForClient(clientId);
+
+                        if (noClientBeingServed()) {
+                            scheduleTotalStatsPrintout();
+                        }
                     }
                 }
                 iterator.remove();
@@ -167,6 +184,24 @@ public class WoCoServer {
 
     private void writeStatsForClient(int clientId) {
         statsWriter.writeForClient(clientId);
+    }
+
+    private void printTotalStatsIfDone() {
+        if (noClientBeingServed() && jobRepo.allJobsProcessed()) {
+            statsWriter.writeTotal();
+        } else {
+            // retry until all jabs have been processed
+            scheduleTotalStatsPrintout();
+        }
+    }
+
+    private void scheduleTotalStatsPrintout() {
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.schedule(this::printTotalStatsIfDone, 200, TimeUnit.MILLISECONDS);
+    }
+
+    private boolean noClientBeingServed() {
+        return servicedClients.isEmpty();
     }
 }
 

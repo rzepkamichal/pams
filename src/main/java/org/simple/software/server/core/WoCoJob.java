@@ -9,6 +9,7 @@ public class WoCoJob {
 
     private final int clientId;
     private final String document;
+    private boolean completed = false;
 
     private final TagRemover tagRemover;
     private final WordCounter wordCounter;
@@ -32,6 +33,7 @@ public class WoCoJob {
         String withoutTags = removeTagsAndLogTime(tagRemover);
         WoCoResult result = countWordsAndLogTime(withoutTags, wordCounter);
 
+        completed = true;
         onComplete.accept(result);
     }
 
@@ -55,5 +57,9 @@ public class WoCoJob {
     private WoCoResult countWordsAndLogTime(String withoutTags, WordCounter wordCounter) {
         WoCoResult result = TimedRunner.run(() -> wordCounter.countWords(withoutTags), wordCountTimeLogListener);
         return result;
+    }
+
+    public boolean isCompleted() {
+        return completed;
     }
 }

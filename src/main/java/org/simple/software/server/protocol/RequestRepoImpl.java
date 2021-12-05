@@ -23,4 +23,9 @@ public class RequestRepoImpl implements RequestRepo {
     public void removeByClientId(int clientId) {
         requests.remove(clientId);
     }
+
+    @Override
+    public long count() {
+        return requests.size();
+    }
 }
