@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 public class WoCoServer {
 
     public static final char SEPARATOR = '$';
+    public static final boolean PRINT_CLIENT_STATS = true;
 
     private final RequestRepo pendingRequestRepo = new RequestRepoImpl();
     private final TagRemover tagRemover = new TagRemoverImpl();
@@ -105,7 +106,7 @@ public class WoCoServer {
                     client.configureBlocking(false);
                     client.register(selector, SelectionKey.OP_READ);
 
-                    System.out.println("Connection Accepted: " + client.getLocalAddress() + "\n");
+                    System.out.println("Connection Accepted: " + client.getLocalAddress());
                     servicedClients.add(getClientId(client));
 
                 } else if (key.isReadable()) {
@@ -133,7 +134,10 @@ public class WoCoServer {
                         key.cancel();
                         pendingRequestRepo.removeByClientId(clientId);
                         servicedClients.remove(clientId);
-                        writeStatsForClient(clientId);
+
+                        if (PRINT_CLIENT_STATS) {
+                            writeStatsForClient(clientId);
+                        }
 
                         if (noClientBeingServed()) {
                             scheduleTotalStatsPrintout();

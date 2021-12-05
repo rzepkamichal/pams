@@ -1,5 +1,7 @@
 package org.simple.software.server.stats;
 
+import java.util.Locale;
+
 public class SystemOutAvgStatsWriter implements StatsWriter {
 
     private final ProcessingStatsRepo statsRepo;
@@ -22,10 +24,10 @@ public class SystemOutAvgStatsWriter implements StatsWriter {
     }
 
     private void writeStats(ProcessingStats stats) {
-        System.out.println("Avg request receive time [ms]: " + stats.getAvgDocReceiveTime());
-        System.out.println("Avg tag removal time [ms]: " + stats.getAvgDocCleaningTime());
-        System.out.println("Avg word count time [ms]: " + stats.getAvgWordCountTime());
-        System.out.println("Avg result serialization time [ms]: " + stats.getAvgSerializationTime());
+        System.out.format(Locale.US, "Avg request receive time [ms]: %.4f\n", stats.getAvgDocReceiveTime());
+        System.out.format(Locale.US, "Avg tag removal time [ms]: %.4f\n", stats.getAvgDocCleaningTime());
+        System.out.format(Locale.US, "Avg word count time [ms]: %.4f\n", stats.getAvgWordCountTime());
+        System.out.format(Locale.US, "Avg result serialization time [ms]: %.4f\n", stats.getAvgSerializationTime());
         System.out.println("--------------------------------------------------------------------------");
         System.out.println();
     }
