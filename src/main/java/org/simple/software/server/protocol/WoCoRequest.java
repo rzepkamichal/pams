@@ -4,8 +4,6 @@ import org.simple.software.WoCoServer;
 import org.simple.software.server.core.JobDataProvider;
 
 import java.io.IOException;
-import java.time.Clock;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class WoCoRequest implements JobDataProvider {
