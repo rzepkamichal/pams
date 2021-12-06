@@ -13,7 +13,7 @@ public class WoCoRequest implements JobDataProvider {
     private final int clientId;
     private final StringBuilder buffer = new StringBuilder();
     private boolean requestSeparatorReceived = false;
-    private final long creationTime = Clock.systemDefaultZone().millis();
+    private final long creationTime = System.nanoTime();
 
     private Consumer<Long> receiveDurationListener = __ -> {};
 
@@ -85,7 +85,7 @@ public class WoCoRequest implements JobDataProvider {
 
         buffer.deleteCharAt(indexNL);
         requestSeparatorReceived = true;
-        receiveDurationListener.accept(Clock.systemDefaultZone().millis() - creationTime);
+        receiveDurationListener.accept(System.nanoTime() - creationTime);
     }
 
     public WoCoRequest fromRemainingData() {
