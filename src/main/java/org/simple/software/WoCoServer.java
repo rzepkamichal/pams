@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 public class WoCoServer {
 
     public static final char SEPARATOR = '$';
-    public static final boolean PRINT_CLIENT_STATS = true;
+    public static final boolean PRINT_CLIENT_STATS = false;
 
     private final RequestRepo pendingRequestRepo = new RequestRepoImpl();
     private final TagRemover tagRemover;

@@ -1,5 +1,7 @@
 package org.simple.software.server.stats;
 
+import java.util.List;
+
 /**
  * Server processing time statistics.
  */
@@ -87,5 +89,21 @@ public class ProcessingStats {
      */
     public double getAvgSerializationTime() {
         return serializationTimeStats.getAvg();
+    }
+
+    public List<Double> getReceiveTimePercentiles() {
+        return docReceiveStats.getPercentiles();
+    }
+
+    public List<Double> getDocCleaningTimePercentiles() {
+        return docCleaningStats.getPercentiles();
+    }
+
+    public List<Double> getWordCountTimePercentiles() {
+        return wordCountStats.getPercentiles();
+    }
+
+    public List<Double> getSerializationTimePercentiles() {
+        return serializationTimeStats.getPercentiles();
     }
 }

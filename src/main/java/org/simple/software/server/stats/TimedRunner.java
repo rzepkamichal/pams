@@ -1,36 +1,28 @@
 package org.simple.software.server.stats;
 
-import java.time.Clock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class TimedRunner {
 
-    public static <T> TimedResult<T> run(Supplier<T> operation) {
-        return run(operation, Clock.systemDefaultZone());
-    }
+    /**
+     * Timer precision in seconds
+     */
+    public static final double PRECISION = 0.000000001;
 
     public static <T> T run(Supplier<T> operation, Consumer<Long> elapsedTimeConsumer) {
-        TimedResult<T> result = run(operation, Clock.systemDefaultZone());
+        TimedResult<T> result = run(operation);
         elapsedTimeConsumer.accept(result.getProcessingTime());
 
         return result.getResult();
     }
 
-    public static <T> TimedResult<T> run(Supplier<T> operation, Clock clock) {
-        long startTime = clock.millis();
+    public static <T> TimedResult<T> run(Supplier<T> operation) {
+        long startTime = System.nanoTime();
         T result = operation.get();
-        long elapsedTime = clock.millis() - startTime;
+        long elapsedTime = System.nanoTime() - startTime;
 
         return new TimedResult<>(elapsedTime, result);
     }
-
-    public static <T> T run(Supplier<T> operation, Consumer<Long> elapsedTimeConsumer, Clock clock) {
-        TimedResult<T> result = run(operation, clock);
-        elapsedTimeConsumer.accept(result.getProcessingTime());
-
-        return result.getResult();
-    }
-
 
 }
