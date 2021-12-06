@@ -109,8 +109,8 @@ public class WoCoServer {
                     SocketChannel client = (SocketChannel) key.channel();
                     int clientId = getClientId(client);
 
-                    WoCoRequest request = pendingRequestRepo.getByClientId(clientId).orElse(
-                            pendingRequestRepo.save(createAndSaveRequest(clientId)));
+                    WoCoRequest request = pendingRequestRepo.getByClientId(clientId)
+                            .orElseGet(() -> createAndSaveRequest(clientId));
 
                     bb.rewind();
                     int readCnt = client.read(bb);
