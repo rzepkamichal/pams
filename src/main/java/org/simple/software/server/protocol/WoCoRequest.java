@@ -55,6 +55,10 @@ public class WoCoRequest implements JobDataProvider {
      */
     public void receiveData(String dataChunk) {
 
+        if (dataChunk.isEmpty()) {
+            return;
+        }
+
         buffer.append(dataChunk);
 
         if (dataChunk.indexOf(Config.REQUEST_SEPARATOR) == -1) {
