@@ -26,6 +26,12 @@
       <attribute name="Class-Path" value="."/>
     </manifest>
   </jar>
+  <jar jarfile="${dist}/WoCoBalancer.jar" basedir="${build}">
+    <manifest>
+      <attribute name="Main-Class" value="org.simple.software.lb.WoCoBalancer"/>
+      <attribute name="Class-Path" value="."/>
+    </manifest>
+  </jar>
 </target>
 
 <target name="clean" description="clean up">
