@@ -1,5 +1,7 @@
 package org.simple.software;
 
+import org.simple.software.protocol.Request;
+import org.simple.software.protocol.WoCoRequestFactory;
 import org.simple.software.server.core.JobExecutor;
 import org.simple.software.server.core.JobRepo;
 import org.simple.software.server.core.JobRepoImpl;
@@ -113,16 +115,16 @@ public class WoCoServer {
                     int readCnt = client.read(bb);
 
                     if (readCnt > 0) {
-                        WoCoRequest request = pendingRequestRepo.getByClientId(clientId)
+                        Request request = pendingRequestRepo.getByClientId(clientId)
                                 .orElseGet(() -> createAndSaveRequest(clientId));
                         String dataChunk = new String(bb.array(), 0, readCnt);
                         request.receiveData(dataChunk);
 
                         if (request.isDataReady()) {
                             pendingRequestRepo.save(request.fromRemainingData());
-                            WoCoJob job = createJob(request, client);
-                            jobRepo.save(job);
-                            jobExecutor.execute(job);
+//                            WoCoJob job = createJob(request, client);
+//                            jobRepo.save(job);
+//                            jobExecutor.execute(job);
                         }
 
                     } else {
@@ -164,9 +166,8 @@ public class WoCoServer {
         }
     }
 
-    private WoCoRequest createAndSaveRequest(int clientId) {
-        WoCoRequest request = new WoCoRequest(clientId, "");
-        request.setReceiveDurationListener(statsRepo.getStatsByClient(clientId)::logDocReceiveTime);
+    private Request createAndSaveRequest(int clientId) {
+        Request request = (new WoCoRequestFactory()).create(clientId);
         return pendingRequestRepo.save(request);
     }
 

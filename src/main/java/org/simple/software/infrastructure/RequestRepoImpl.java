@@ -1,5 +1,6 @@
 package org.simple.software.infrastructure;
 
+import org.simple.software.protocol.Request;
 import org.simple.software.protocol.WoCoRequest;
 
 import java.util.HashMap;
@@ -8,15 +9,15 @@ import java.util.Optional;
 
 public class RequestRepoImpl implements RequestRepo {
 
-    Map<Integer, WoCoRequest> requests = new HashMap<>();
+    Map<Integer, Request> requests = new HashMap<>();
 
     @Override
-    public Optional<WoCoRequest> getByClientId(int clientId) {
+    public Optional<Request> getByClientId(int clientId) {
         return Optional.ofNullable(requests.get(clientId));
     }
 
     @Override
-    public WoCoRequest save(WoCoRequest req) {
+    public Request save(Request req) {
         requests.put(req.getClientId(), req);
         return req;
     }

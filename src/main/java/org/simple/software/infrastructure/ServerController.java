@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ServerController {
 
-    CompletableFuture<Response> doService(Request request);
+    CompletableFuture<Response> handle(Request request);
 
-    void onDisconnect(SocketChannel client);
+    default void onDisconnect(SocketChannel client) {};
 }

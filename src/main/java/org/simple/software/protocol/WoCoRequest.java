@@ -11,6 +11,7 @@ public class WoCoRequest implements Request {
     private final StringBuilder buffer = new StringBuilder();
     private boolean requestSeparatorReceived = false;
     private final long creationTime = System.nanoTime();
+    private long receiveTime;
 
     private Consumer<Long> receiveDurationListener = __ -> {};
 
@@ -19,7 +20,7 @@ public class WoCoRequest implements Request {
      */
     private String remainingData = "";
 
-    public WoCoRequest(int clientId, String initialDataChunk) {
+    WoCoRequest(int clientId, String initialDataChunk) {
         this.clientId = clientId;
         receiveData(initialDataChunk);
     }
@@ -88,7 +89,7 @@ public class WoCoRequest implements Request {
 
         buffer.deleteCharAt(indexNL);
         requestSeparatorReceived = true;
-        receiveDurationListener.accept(System.nanoTime() - creationTime);
+        receiveTime = System.nanoTime() - creationTime;
     }
 
     @Override
@@ -100,7 +101,8 @@ public class WoCoRequest implements Request {
         return new WoCoRequest(clientId, remainingData);
     }
 
-    public void setReceiveDurationListener(Consumer<Long> receiveDurationListener) {
-        this.receiveDurationListener = receiveDurationListener;
+    @Override
+    public long getReceiveTime() {
+        return receiveTime;
     }
 }
