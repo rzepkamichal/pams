@@ -24,6 +24,7 @@ public class WoCoRequest implements Request {
         receiveData(initialDataChunk);
     }
 
+    @Override
     public boolean isDataReady() {
         return requestSeparatorReceived;
     }
@@ -52,6 +53,7 @@ public class WoCoRequest implements Request {
      * @param dataChunk
      * @return A document has been processed or not.
      */
+    @Override
     public void receiveData(String dataChunk) {
 
         if (dataChunk.isEmpty()) {
@@ -89,6 +91,7 @@ public class WoCoRequest implements Request {
         receiveDurationListener.accept(System.nanoTime() - creationTime);
     }
 
+    @Override
     public WoCoRequest fromRemainingData() {
         if (!isDataReady()) {
             throw new IllegalStateException("Request not yet ready. No remaining data.");
