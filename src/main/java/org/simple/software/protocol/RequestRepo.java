@@ -1,4 +1,4 @@
-package org.simple.software.server.protocol;
+package org.simple.software.protocol;
 
 import java.util.Optional;
 

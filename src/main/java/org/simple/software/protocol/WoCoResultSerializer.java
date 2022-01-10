@@ -1,9 +1,8 @@
-package org.simple.software.server.protocol;
+package org.simple.software.protocol;
 
 import org.simple.software.server.core.ResultSerializer;
 import org.simple.software.server.core.WoCoResult;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class WoCoResultSerializer implements ResultSerializer {
