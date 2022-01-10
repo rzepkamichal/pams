@@ -15,7 +15,7 @@ public class WoCoService implements BackendService {
     }
 
     @Override
-    public Response service(Request request) {
+    public Response serve(Request request) {
         try {
             return Response.of(client.send(request.getData()));
         } catch (IOException e) {

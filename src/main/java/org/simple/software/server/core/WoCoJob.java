@@ -5,7 +5,7 @@ import org.simple.software.server.stats.TimedRunner;
 
 import java.util.function.Consumer;
 
-public class WoCoJob {
+public class WoCoJob implements Job {
 
     private final int clientId;
     private final String document;
@@ -29,6 +29,7 @@ public class WoCoJob {
         return clientId;
     }
 
+    @Override
     public void execute() {
         String withoutTags = removeTagsAndLogTime(tagRemover);
         WoCoResult result = countWordsAndLogTime(withoutTags, wordCounter);
