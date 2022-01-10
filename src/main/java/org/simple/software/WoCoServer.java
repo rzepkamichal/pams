@@ -10,9 +10,9 @@ import org.simple.software.server.core.WoCoJob;
 import org.simple.software.server.core.WoCoResult;
 import org.simple.software.server.core.WordCounter;
 import org.simple.software.server.core.WordCounterImpl;
-import org.simple.software.server.infrastructure.ThreadedJobExecutor;
-import org.simple.software.protocol.RequestRepo;
-import org.simple.software.protocol.RequestRepoImpl;
+import org.simple.software.infrastructure.ThreadedJobExecutor;
+import org.simple.software.infrastructure.RequestRepo;
+import org.simple.software.infrastructure.RequestRepoImpl;
 import org.simple.software.protocol.WoCoRequest;
 import org.simple.software.protocol.WoCoResultSerializer;
 import org.simple.software.server.stats.ProcessingStats;
@@ -109,13 +109,12 @@ public class WoCoServer {
                     SocketChannel client = (SocketChannel) key.channel();
                     int clientId = getClientId(client);
 
-                    WoCoRequest request = pendingRequestRepo.getByClientId(clientId)
-                            .orElseGet(() -> createAndSaveRequest(clientId));
-
                     bb.rewind();
                     int readCnt = client.read(bb);
 
                     if (readCnt > 0) {
+                        WoCoRequest request = pendingRequestRepo.getByClientId(clientId)
+                                .orElseGet(() -> createAndSaveRequest(clientId));
                         String dataChunk = new String(bb.array(), 0, readCnt);
                         request.receiveData(dataChunk);
 

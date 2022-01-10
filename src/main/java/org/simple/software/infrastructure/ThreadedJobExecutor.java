@@ -1,4 +1,4 @@
-package org.simple.software.server.infrastructure;
+package org.simple.software.infrastructure;
 
 import org.simple.software.server.core.JobExecutor;
 import org.simple.software.server.core.WoCoJob;

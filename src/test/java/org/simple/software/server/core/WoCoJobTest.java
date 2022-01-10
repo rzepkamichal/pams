@@ -4,10 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.simple.software.protocol.Request;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -24,7 +24,7 @@ class WoCoJobTest {
     WordCounter wordCounter;
 
     @Mock
-    JobDataProvider jobData;
+    Request jobData;
 
     WoCoResult result;
 

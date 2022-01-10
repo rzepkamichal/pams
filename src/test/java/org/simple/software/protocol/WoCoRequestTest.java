@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class WoCoRequestTest {
 
-    public static final char SEPARATOR = Config.REQUEST_SEPARATOR;
+    public static final char SEPARATOR = Const.REQUEST_SEPARATOR;
 
     @Test
     void receives_data() {

@@ -1,4 +1,6 @@
-package org.simple.software.protocol;
+package org.simple.software.infrastructure;
+
+import org.simple.software.protocol.WoCoRequest;
 
 import java.util.Optional;
 

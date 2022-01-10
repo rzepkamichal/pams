@@ -1,12 +1,11 @@
 package org.simple.software.protocol;
 
 import org.simple.software.WoCoServer;
-import org.simple.software.server.core.JobDataProvider;
 
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public class WoCoRequest implements JobDataProvider {
+public class WoCoRequest implements Request {
 
     private final int clientId;
     private final StringBuilder buffer = new StringBuilder();
@@ -61,7 +60,7 @@ public class WoCoRequest implements JobDataProvider {
 
         buffer.append(dataChunk);
 
-        if (dataChunk.indexOf(Config.REQUEST_SEPARATOR) == -1) {
+        if (dataChunk.indexOf(Const.REQUEST_SEPARATOR) == -1) {
             return;
         }
 

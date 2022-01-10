@@ -1,6 +1,6 @@
 package org.simple.software.server.core;
 
-import org.simple.software.server.stats.ProcessingStatsRepo;
+import org.simple.software.protocol.Request;
 import org.simple.software.server.stats.TimedRunner;
 
 import java.util.function.Consumer;
@@ -18,9 +18,9 @@ public class WoCoJob {
     private Consumer<Long> tagRemovalTimeLogListener = __ -> {};
     private Consumer<Long> wordCountTimeLogListener = __ -> {};
 
-    public WoCoJob(JobDataProvider dataProvider, TagRemover tagRemover, WordCounter wordCounter) {
-        this.clientId = dataProvider.getClientId();
-        this.document = dataProvider.getData();
+    public WoCoJob(Request request, TagRemover tagRemover, WordCounter wordCounter) {
+        this.clientId = request.getClientId();
+        this.document = request.getData();
         this.tagRemover = tagRemover;
         this.wordCounter = wordCounter;
     }
