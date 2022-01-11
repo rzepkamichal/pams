@@ -1,5 +1,6 @@
 package org.simple.software.server.core;
 
+import org.simple.software.infrastructure.Job;
 import org.simple.software.protocol.Request;
 import org.simple.software.server.stats.TimedRunner;
 

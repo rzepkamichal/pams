@@ -1,4 +1,4 @@
-package org.simple.software.lb;
+package org.simple.software.loadbalancer;
 
 public interface LoadBalancer {
 

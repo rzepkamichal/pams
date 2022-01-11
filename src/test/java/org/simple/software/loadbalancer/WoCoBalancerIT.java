@@ -1,4 +1,4 @@
-package org.simple.software.lb;
+package org.simple.software.loadbalancer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,7 @@ import org.simple.software.infrastructure.TCPClient;
 import org.simple.software.infrastructure.TCPServer;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
 import org.simple.software.protocol.Response;
-import org.simple.software.server.core.JobExecutor;
+import org.simple.software.infrastructure.JobExecutor;
 
 import java.io.IOException;
 import java.util.HashMap;

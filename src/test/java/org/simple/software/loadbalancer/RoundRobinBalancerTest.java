@@ -1,4 +1,4 @@
-package org.simple.software.lb;
+package org.simple.software.loadbalancer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package org.simple.software.lb;
+package org.simple.software.loadbalancer;
 
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.Response;

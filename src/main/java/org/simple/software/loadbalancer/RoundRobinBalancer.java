@@ -1,4 +1,4 @@
-package org.simple.software.lb;
+package org.simple.software.loadbalancer;
 
 import java.util.Collection;
 import java.util.HashMap;

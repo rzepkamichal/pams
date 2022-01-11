@@ -1,4 +1,4 @@
-package org.simple.software.server.core;
+package org.simple.software.infrastructure;
 
 public interface Job {
 

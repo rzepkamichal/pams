@@ -2,6 +2,7 @@ package org.simple.software.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.simple.software.server.core.WoCoResult;
+import org.simple.software.server.core.WoCoResultSerializer;
 
 import static org.junit.jupiter.api.Assertions.*;
 

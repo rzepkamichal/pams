@@ -28,7 +28,7 @@
   </jar>
   <jar jarfile="${dist}/WoCoBalancer.jar" basedir="${build}">
     <manifest>
-      <attribute name="Main-Class" value="org.simple.software.lb.WoCoBalancer"/>
+      <attribute name="Main-Class" value="org.simple.software.loadbalancer.WoCoBalancer"/>
       <attribute name="Class-Path" value="."/>
     </manifest>
   </jar>

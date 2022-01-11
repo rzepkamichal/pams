@@ -1,9 +1,9 @@
-package org.simple.software.lb;
+package org.simple.software.loadbalancer;
 
 import org.simple.software.infrastructure.ServerController;
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.Response;
-import org.simple.software.server.core.JobExecutor;
+import org.simple.software.infrastructure.JobExecutor;
 
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;

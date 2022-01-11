@@ -1,5 +1,7 @@
 package org.simple.software.server.core;
 
+import org.simple.software.infrastructure.JobRepo;
+
 import java.util.HashSet;
 import java.util.Set;
 

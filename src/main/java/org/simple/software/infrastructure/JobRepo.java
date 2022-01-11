@@ -1,4 +1,6 @@
-package org.simple.software.server.core;
+package org.simple.software.infrastructure;
+
+import org.simple.software.server.core.WoCoJob;
 
 public interface JobRepo {
 

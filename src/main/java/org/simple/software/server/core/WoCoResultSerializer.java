@@ -1,4 +1,4 @@
-package org.simple.software.protocol;
+package org.simple.software.server.core;
 
 import org.simple.software.server.core.ResultSerializer;
 import org.simple.software.server.core.WoCoResult;
