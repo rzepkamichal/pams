@@ -26,8 +26,8 @@ import java.util.logging.Logger;
 
 public class TCPServer {
 
+    private final boolean DEBUG = false;
     private final Logger log = Logger.getLogger(this.getClass().getName());
-
 
     private final String address;
     private final int port;
@@ -65,6 +65,7 @@ public class TCPServer {
 
         keepRunning.set(true);
         started.set(true);
+
         log.info("Started. Ready to accept connections.");
 
         // Infinite loop..
@@ -100,7 +101,11 @@ public class TCPServer {
                         request.receiveData(dataChunk);
 
                         if (request.isDataReady()) {
-                            log.info(port + " serving \"" + request.getData() + "\" for " + clientId);
+
+                            if (DEBUG) {
+                                log.info(port + " serving \"" + request.getData() + "\" for " + clientId);
+                            }
+
                             pendingRequestRepo.save(request.fromRemainingData());
                             statsRepo.getStatsByClient(clientId).logDocReceiveTime(request.getReceiveTime());
                             controller.handle(request)
@@ -168,7 +173,9 @@ public class TCPServer {
         String rawResponse = response.getData() + "\n";
         ByteBuffer ba = ByteBuffer.wrap(rawResponse.getBytes());
         try {
-            log.info(port + " sending response \"" + response.getData() + "\" to client " + getClientId(client));
+            if (DEBUG) {
+                log.info(port + " sending response \"" + response.getData() + "\" to client " + getClientId(client));
+            }
             client.write(ba);
         } catch (IOException e) {
             throw new RuntimeException(e);
