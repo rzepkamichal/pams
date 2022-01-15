@@ -50,6 +50,9 @@ public class WoCoServer {
 
     public static void main(String[] args) throws IOException {
 
+        // simpler format of logs
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+
         if (args.length != 4) {
             System.out.println("Usage: <listenaddress> <listenport> <cleaning> <threadcount>");
             System.exit(0);

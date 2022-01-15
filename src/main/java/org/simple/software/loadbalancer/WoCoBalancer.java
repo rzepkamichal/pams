@@ -8,9 +8,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class WoCoBalancer {
+
+    private static final Logger log = Logger.getLogger(WoCoBalancer.class.getName());
 
     private final TCPServer server;
 
@@ -24,6 +27,9 @@ public class WoCoBalancer {
     }
 
     public static void main(String[] args) {
+
+        // simpler format of logs
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] [%4$-7s] %5$s %n");
 
         if (args.length != 4) {
             System.out.println("Usage: <listenaddress> <listenport> <backend_servers_config_file> <threadcount>");
@@ -45,7 +51,8 @@ public class WoCoBalancer {
         try {
             return ConfigReader.readServersFromFile(configFilePath)
                     .stream()
-                    .map(add -> new WoCoService(add.getHost(), add.getPort()))
+                    .peek(serv -> log.info("Registered backend service: " + serv.getHost() + ":" + serv.getPort()))
+                    .map(serv -> new WoCoService(serv.getHost(), serv.getPort()))
                     .collect(Collectors.toList());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
