@@ -23,7 +23,7 @@ class WoCoResultSerializerTest {
 
         String serialized = serializer.serialize(result);
 
-        String expected = "hijk,2,asd,2,efg,1,\n";
+        String expected = "hijk,2,asd,2,efg,1,";
         assertEquals(expected, serialized);
 
     }

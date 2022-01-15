@@ -14,6 +14,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -99,6 +100,7 @@ public class TCPServer {
                         request.receiveData(dataChunk);
 
                         if (request.isDataReady()) {
+                            log.info(port + " serving \"" + request.getData() + "\" for " + clientId);
                             pendingRequestRepo.save(request.fromRemainingData());
                             statsRepo.getStatsByClient(clientId).logDocReceiveTime(request.getReceiveTime());
                             controller.handle(request)
@@ -166,6 +168,7 @@ public class TCPServer {
         String rawResponse = response.getData() + "\n";
         ByteBuffer ba = ByteBuffer.wrap(rawResponse.getBytes());
         try {
+            log.info(port + " sending response \"" + response.getData() + "\" to client " + getClientId(client));
             client.write(ba);
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -25,7 +25,6 @@ public class WoCoResultSerializer implements ResultSerializer {
             sb.append(results.get(key) + ",");
         }
 
-        sb.append("\n");
         return sb.substring(0);
 
     }

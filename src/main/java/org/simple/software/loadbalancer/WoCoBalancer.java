@@ -23,7 +23,7 @@ public class WoCoBalancer {
         balancer.run();
     }
 
-    WoCoBalancer(String address, int port, int threadNum, Collection<BackendService> services) {
+    public WoCoBalancer(String address, int port, int threadNum, Collection<BackendService> services) {
         ServerController controller = new LBServerController(
                 new RoundRobinBalancer(services),
                 new ThreadedJobExecutor(threadNum)
