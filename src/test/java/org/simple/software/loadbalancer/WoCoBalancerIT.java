@@ -159,10 +159,7 @@ class WoCoBalancerIT {
         // the second service transforms the received data to upper case
         BackendService upperCaseService = req -> Response.of(req.getData().toUpperCase());
 
-        LoadBalancer lb = new RoundRobinBalancer(List.of(duplicatingService, upperCaseService));
-        JobExecutor executor = new ThreadedJobExecutor(1);
-
-        return new WoCoBalancer(address, port, lb, executor);
+        return new WoCoBalancer(address, port, 1, List.of(duplicatingService, upperCaseService));
     }
 
     private WoCoBalancer setupBalancerUnderTestWithRealServers() {
@@ -174,7 +171,7 @@ class WoCoBalancerIT {
 
         // client which calls duplicatingServer
         BackendService duplicatingService =
-                new WoCoService(new TCPClient("localhost", 26000));
+                new WoCoService("localhost", 26000);
 
         // the second service transforms the received data to upper case
         ServerController controller2 = req -> CompletableFuture.completedFuture(
@@ -184,17 +181,14 @@ class WoCoBalancerIT {
 
         // client which calls upperCase server
         BackendService upperCaseService =
-                new WoCoService(new TCPClient("localhost", 26001));
-
-        LoadBalancer lb = new RoundRobinBalancer(List.of(duplicatingService, upperCaseService));
-        JobExecutor executor = new ThreadedJobExecutor(1);
+                new WoCoService("localhost", 26001);
 
         // wait for services to set up
         //noinspection StatementWithEmptyBody
         while (!server1.isReady() && !server2.isReady()) {
         }
 
-        return new WoCoBalancer(address, port, lb, executor);
+        return new WoCoBalancer(address, port, 1, List.of(duplicatingService, upperCaseService));
     }
 
     private void sendClientRequest(TCPClient client, String request, Consumer<String> onResponse) {

@@ -10,8 +10,8 @@ public class WoCoService implements BackendService {
 
     private final TCPClient client;
 
-    public WoCoService(TCPClient client) {
-        this.client = client;
+    public WoCoService(String address, int port) {
+        this.client = new TCPClient(address, port);
     }
 
     @Override
