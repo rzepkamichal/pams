@@ -34,6 +34,7 @@ public class WoCoJob implements Job {
     public void execute() {
         String withoutTags = removeTagsAndLogTime(tagRemover);
         WoCoResult result = countWordsAndLogTime(withoutTags, wordCounter);
+        result.setClientId(clientId);
 
         completed = true;
         onComplete.accept(result);

@@ -1,6 +1,6 @@
 package org.simple.software.infrastructure;
 
-import org.simple.software.WoCoServer;
+import org.simple.software.server.WoCoServer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.channels.AsynchronousSocketChannel;
 
 public class TCPClient {
 
@@ -35,9 +34,7 @@ public class TCPClient {
         sOutput.write(data);
         sOutput.write(WoCoServer.SEPARATOR);
         sOutput.flush();
-
-        String response = null;
-        response = sInput.readLine();
+        String response = sInput.readLine();
 
         return response;
     }

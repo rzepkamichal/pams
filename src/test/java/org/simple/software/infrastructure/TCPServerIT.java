@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 class TCPServerIT {
 
     public static final String address = "localhost";
-    public static final int port = 12345;
+    public static final int port = 12346;
 
     TCPServer server;
     TCPClient client = new TCPClient(address, port);
@@ -67,7 +67,7 @@ class TCPServerIT {
 
         // wait for all clients being served
         //noinspection StatementWithEmptyBody
-        while(responses.size() != 2) {}
+        while(responses.size() != 3) {}
 
         client1.close();
         client2.close();

@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class WoCoResult {
 
+    private int clientId;
     private final Map<String, Integer> results = new HashMap<>();
 
     public void addSingleResult(String word) {
@@ -14,6 +15,14 @@ public class WoCoResult {
         } else {
             results.put(word, 1);
         }
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+    }
+
+    public int getClientId() {
+        return clientId;
     }
 
     public Map<String, Integer> getResults() {

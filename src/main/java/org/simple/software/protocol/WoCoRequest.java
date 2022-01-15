@@ -1,6 +1,6 @@
 package org.simple.software.protocol;
 
-import org.simple.software.WoCoServer;
+import org.simple.software.server.WoCoServer;
 
 import java.io.IOException;
 import java.util.function.Consumer;

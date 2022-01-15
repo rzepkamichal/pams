@@ -17,6 +17,9 @@ import java.nio.channels.SocketChannel;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -106,7 +109,11 @@ public class TCPServer {
                         key.cancel();
                         pendingRequestRepo.removeByClientId(clientId);
                         servicedClients.remove(clientId);
-                        controller.onDisconnect(client);
+                        controller.onDisconnect(clientId);
+
+                        if (noClientBeingServed()) {
+                            scheduleIdleTimeout();
+                        }
                     }
                 }
                 iterator.remove();
@@ -116,8 +123,22 @@ public class TCPServer {
 
     }
 
-    public boolean anyClientBeingServed() {
-        return !servicedClients.isEmpty();
+    private boolean noClientBeingServed() {
+        return servicedClients.isEmpty();
+    }
+
+    private void scheduleIdleTimeout() {
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.schedule(this::onIdleTimeout, 200, TimeUnit.MILLISECONDS);
+    }
+
+    private void onIdleTimeout() {
+        if (noClientBeingServed()) {
+            controller.onIdle();
+        } else {
+            // retry until all jabs have been processed
+            scheduleIdleTimeout();
+        }
     }
 
     public void stop() throws IOException {

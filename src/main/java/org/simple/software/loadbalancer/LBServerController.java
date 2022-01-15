@@ -32,7 +32,7 @@ public class LBServerController implements ServerController {
     }
 
     @Override
-    public void onDisconnect(SocketChannel client) {
-        ServerController.super.onDisconnect(client);
+    public void onDisconnect(int clientId) {
+        ServerController.super.onDisconnect(clientId);
     }
 }

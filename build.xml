@@ -16,7 +16,7 @@
 <target name="dist" depends="compile" description="generate the distribution">
   <jar jarfile="${dist}/WoCoServer.jar" basedir="${build}">
     <manifest>
-      <attribute name="Main-Class" value="org.simple.software.WoCoServer"/>
+      <attribute name="Main-Class" value="org.simple.software.server.WoCoServer"/>
       <attribute name="Class-Path" value="."/>
     </manifest>
   </jar>

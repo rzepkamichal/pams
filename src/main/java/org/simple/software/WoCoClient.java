@@ -1,8 +1,9 @@
 package org.simple.software;
 
+import org.simple.software.server.WoCoServer;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,11 +13,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.plaf.SliderUI;
 
 public class WoCoClient {
 	
