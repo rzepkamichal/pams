@@ -8,7 +8,7 @@ import org.simple.software.infrastructure.JobExecutor;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;
 
-public class LBServerController implements ServerController {
+class LBServerController implements ServerController {
 
     private final LoadBalancer loadBalancer;
     private final JobExecutor jobExecutor;

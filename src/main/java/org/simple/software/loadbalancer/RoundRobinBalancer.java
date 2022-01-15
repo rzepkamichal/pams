@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RoundRobinBalancer implements LoadBalancer {
+class RoundRobinBalancer implements LoadBalancer {
 
     private final Map<Integer, BackendService> services = new HashMap<>();
     private final int numServices;
