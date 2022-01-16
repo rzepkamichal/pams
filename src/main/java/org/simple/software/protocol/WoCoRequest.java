@@ -9,7 +9,10 @@ public class WoCoRequest implements Request {
     private final int clientId;
     private final StringBuilder buffer = new StringBuilder();
     private boolean requestSeparatorReceived = false;
+
     private final long creationTime = System.nanoTime();
+    private long readyTime = 0L;
+
     private long receiveTime;
 
     private Consumer<Long> receiveDurationListener = __ -> {};
@@ -77,10 +80,21 @@ public class WoCoRequest implements Request {
         buffer.deleteCharAt(indexNL);
         requestSeparatorReceived = true;
         receiveTime = System.nanoTime() - creationTime;
+        readyTime = System.nanoTime();
+    }
+
+    @Override
+    public long getReceiveDuration() {
+        return receiveTime;
     }
 
     @Override
     public long getReceiveTime() {
-        return receiveTime;
+        return creationTime;
+    }
+
+    @Override
+    public long getReadyTime() {
+        return readyTime;
     }
 }

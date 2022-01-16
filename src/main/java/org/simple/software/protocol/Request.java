@@ -7,5 +7,8 @@ public interface Request {
     void receiveData(String dataChunk);
     boolean isDataReady();
 
+    long getReceiveDuration();
+
     long getReceiveTime();
+    long getReadyTime();
 }

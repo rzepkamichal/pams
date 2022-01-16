@@ -1,10 +1,10 @@
 package org.simple.software.loadbalancer;
 
 import org.simple.software.infrastructure.InMemoryTCPClientRepo;
-import org.simple.software.infrastructure.ServerController;
 import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.infrastructure.TCPServer;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
+import org.simple.software.stats.InMemoryStatsRepo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,10 +28,12 @@ public class WoCoBalancer {
     private static final TCPClientRepo tcpClientRepo = new InMemoryTCPClientRepo();
 
     public WoCoBalancer(String address, int port, int threadNum, Collection<BackendService> services) {
-        ServerController controller = new LBServerController(
+        LBServerController controller = new LBServerController(
                 new RoundRobinBalancer(services),
                 new ThreadedJobExecutor(threadNum),
                 tcpClientRepo);
+
+        controller.setStatsRepo(new InMemoryStatsRepo<>());
 
         server = new TCPServer(address, port, controller);
     }
