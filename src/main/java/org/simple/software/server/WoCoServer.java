@@ -13,11 +13,12 @@ import org.simple.software.server.core.WordCounter;
 import org.simple.software.server.core.WordCounterImpl;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
 import org.simple.software.server.core.WoCoResultSerializer;
+import org.simple.software.server.stats.CSVStatsWriter;
 import org.simple.software.server.stats.ProcessingStatsRepo;
 import org.simple.software.server.stats.StatsRepoImpl;
 import org.simple.software.server.stats.StatsWriter;
-import org.simple.software.server.stats.SystemOutAvgStatsWriter;
 
+import java.io.File;
 import java.io.IOException;
 
 public class WoCoServer {
@@ -28,7 +29,7 @@ public class WoCoServer {
     private final WordCounter wordCounter = new WordCounterImpl();
     private final ResultSerializer serializer = new WoCoResultSerializer();
     private final ProcessingStatsRepo statsRepo = new StatsRepoImpl();
-    private final StatsWriter statsWriter = new SystemOutAvgStatsWriter(statsRepo);
+    private final StatsWriter statsWriter;
     private final JobExecutor jobExecutor;
     private final JobRepo jobRepo = new JobRepoImpl();
 
@@ -39,6 +40,9 @@ public class WoCoServer {
 
         // if tag removal disabled, then use just a default "input repeater"
         this.tagRemover = removeTags ? new RegexpTagRemover() : str -> str;
+
+        String logsDirPath = "." + File.separator + "log-" + address + "-" + port;
+        statsWriter = new CSVStatsWriter(logsDirPath, statsRepo);
 
         ServerController controller = new WoCoServerController(jobExecutor, tagRemover, wordCounter,
                 serializer, statsRepo, statsWriter);
