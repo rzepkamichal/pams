@@ -19,11 +19,19 @@ public class WoCoBalancer {
 
     private final TCPServer server;
 
+    // The backend services use a shared repo of TCPClients.
+    // The load balancer maintains a separate TCPClient (socket) for each WoCoClient.
+    // It enables forwarding WoCoClient requests on separate channels to the backend servers,
+    // rather than using a shared channel. In this way, the WoCoServers can recognise connections from different clients.
+    // Otherwise, the WoCoServers would get only a single-channel connection from the LB
+    // and would muddle requests from different WoCoClients into one.
+    private static final TCPClientRepo tcpClientRepo = new InMemoryTCPClientRepo();
+
     public WoCoBalancer(String address, int port, int threadNum, Collection<BackendService> services) {
         ServerController controller = new LBServerController(
                 new RoundRobinBalancer(services),
-                new ThreadedJobExecutor(threadNum)
-        );
+                new ThreadedJobExecutor(threadNum),
+                tcpClientRepo);
 
         server = new TCPServer(address, port, controller);
     }
@@ -51,13 +59,7 @@ public class WoCoBalancer {
 
     private static List<BackendService> createBackendServicesFromConfig(String configFilePath) {
         try {
-            // The backend services use a shared repo of TCPClients.
-            // The load balancer maintains a separate TCPClient (socket) for each WoCoClient.
-            // It enables forwarding WoCoClient requests on separate channels to the backend servers,
-            // rather than using a shared channel. In this way, the WoCoServers can recognise connections from different clients.
-            // Otherwise, the WoCoServers would get only a single-channel connection from the LB
-            // and would muddle requests from different WoCoClients into one.
-            TCPClientRepo tcpClientRepo = new InMemoryTCPClientRepo();
+
             return ConfigReader.readServersFromFile(configFilePath)
                     .stream()
                     .peek(serv -> log.info("Registered backend service: " + serv.getHost() + ":" + serv.getPort()))
