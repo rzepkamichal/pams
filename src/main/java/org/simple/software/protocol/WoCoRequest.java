@@ -2,7 +2,6 @@ package org.simple.software.protocol;
 
 import org.simple.software.server.WoCoServer;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 public class WoCoRequest implements Request {
@@ -14,11 +13,6 @@ public class WoCoRequest implements Request {
     private long receiveTime;
 
     private Consumer<Long> receiveDurationListener = __ -> {};
-
-    /**
-     * Data which was sent after a request separator and so begins a new request
-     */
-    private String remainingData = "";
 
     WoCoRequest(int clientId, String initialDataChunk) {
         this.clientId = clientId;
@@ -77,28 +71,12 @@ public class WoCoRequest implements Request {
         }
 
         if (rest != null) {
-            System.out.println("more than one line: \n" + rest);
-            try {
-                System.in.read();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            remainingData = rest;
+            throw new IllegalStateException("More than one line: \n" + rest);
         }
 
         buffer.deleteCharAt(indexNL);
         requestSeparatorReceived = true;
         receiveTime = System.nanoTime() - creationTime;
-    }
-
-    @Override
-    public WoCoRequest fromRemainingData() {
-        if (!isDataReady()) {
-            throw new IllegalStateException("Request not yet ready. No remaining data.");
-        }
-
-        return new WoCoRequest(clientId, remainingData);
     }
 
     @Override

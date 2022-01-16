@@ -14,7 +14,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -106,7 +105,7 @@ public class TCPServer {
                                 log.info(port + " serving \"" + request.getData() + "\" for " + clientId);
                             }
 
-                            pendingRequestRepo.save(request.fromRemainingData());
+                            pendingRequestRepo.removeByClientId(clientId);
                             statsRepo.getStatsByClient(clientId).logDocReceiveTime(request.getReceiveTime());
                             controller.handle(request)
                                     .thenAccept(response -> sendResponse(client, response));

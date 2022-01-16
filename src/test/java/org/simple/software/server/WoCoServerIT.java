@@ -38,6 +38,22 @@ class WoCoServerIT {
     }
 
     @Test
+    void counts_words__serving_single_client_with_more_lines() throws IOException {
+        server = new WoCoServer(ADDRESS, PORT, 1, true);
+        new Thread(server::run).start();
+        waitForServer(server);
+
+        TCPClient client = new TCPClient(ADDRESS, PORT);
+
+        // $ - separates lines in the protocol
+        String response = client.send("aaa bb$ cc cc$ bb aa c");
+        client.close();
+
+        // FIXME actually, the order of words shouldn't matter but I was to lazy to implement such check
+        assertEquals("aaa,1,bb,2,cc,2,aa,1,c,1,", response);
+    }
+
+    @Test
     void counts_words__serving_multiple_clients() {
         server = new WoCoServer(ADDRESS, PORT, 1, true);
         new Thread(server::run).start();

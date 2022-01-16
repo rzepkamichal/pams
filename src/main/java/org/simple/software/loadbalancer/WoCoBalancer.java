@@ -1,6 +1,8 @@
 package org.simple.software.loadbalancer;
 
+import org.simple.software.infrastructure.InMemoryTCPClientRepo;
 import org.simple.software.infrastructure.ServerController;
+import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.infrastructure.TCPServer;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
 
@@ -49,10 +51,17 @@ public class WoCoBalancer {
 
     private static List<BackendService> createBackendServicesFromConfig(String configFilePath) {
         try {
+            // The backend services use a shared repo of TCPClients.
+            // The load balancer maintains a separate TCPClient (socket) for each WoCoClient.
+            // It enables forwarding WoCoClient requests on separate channels to the backend servers,
+            // rather than using a shared channel. In this way, the WoCoServers can recognise connections from different clients.
+            // Otherwise, the WoCoServers would get only a single-channel connection from the LB
+            // and would muddle requests from different WoCoClients into one.
+            TCPClientRepo tcpClientRepo = new InMemoryTCPClientRepo();
             return ConfigReader.readServersFromFile(configFilePath)
                     .stream()
                     .peek(serv -> log.info("Registered backend service: " + serv.getHost() + ":" + serv.getPort()))
-                    .map(serv -> new WoCoService(serv.getHost(), serv.getPort()))
+                    .map(serv -> new WoCoService(serv.getHost(), serv.getPort(), tcpClientRepo))
                     .collect(Collectors.toList());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

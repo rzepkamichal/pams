@@ -6,7 +6,6 @@ public interface Request {
     String getData();
     void receiveData(String dataChunk);
     boolean isDataReady();
-    Request fromRemainingData();
 
     long getReceiveTime();
 }

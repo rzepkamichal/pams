@@ -2,7 +2,9 @@ package org.simple.software;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.simple.software.infrastructure.InMemoryTCPClientRepo;
 import org.simple.software.infrastructure.TCPClient;
+import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.loadbalancer.BackendService;
 import org.simple.software.loadbalancer.WoCoBalancer;
 import org.simple.software.loadbalancer.WoCoService;
@@ -22,11 +24,11 @@ import static org.mockito.Mockito.verify;
 
 class WoCoE2ETest {
 
-// beautifies logs
-    //    static {
-//        System.setProperty("java.util.logging.SimpleFormatter.format",
-//                "[%1$tF %1$tT] [%4$-7s] %5$s %n");
-//    }
+    // beautifies logs
+    static {
+        System.setProperty("java.util.logging.SimpleFormatter.format",
+                "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+    }
 
     public static final String ADDRESS = "localhost";
 
@@ -78,23 +80,46 @@ class WoCoE2ETest {
     }
 
     @Test
-    void test_with_parallel_clients() {
+    void test_with_sequential_clients_and_data_with_multiple_lines() throws IOException {
         startServers();
         startLoadBalancer();
 
-        Map<Integer, String> responses = new ConcurrentHashMap<>();
-        sendClientRequestOnNewThread(client1, "aa bb bb", resp -> responses.put(1, resp));
-        sendClientRequestOnNewThread(client2, "cc c cc cc dd", resp -> responses.put(2, resp));
-        sendClientRequestOnNewThread(client3, "eee eee kk eee kk", resp -> responses.put(3, resp));
-        sendClientRequestOnNewThread(client4, "aa aa bb", resp -> responses.put(4, resp));
-
-        // wait for all clients to get responses
-        while(responses.size() != 4) {
-        }
+        String resp1 = client1.send("aa $ xyz");
+        String resp2 = client2.send("bb bb");
+        String resp3 = client1.send("cc $cc cc");
+        String resp4 = client2.send("dd dd dd dd");
 
         // both backend servers should get equal num of requests
         verify(service1, times(2)).serve(any());
         verify(service2, times(2)).serve(any());
+
+        assertEquals("aa,1,xyz,1,", resp1);
+        assertEquals("bb,2,", resp2);
+        assertEquals("cc,3,", resp3);
+        assertEquals("dd,4,", resp4);
+    }
+
+    @Test
+    void test_with_parallel_clients() {
+        startServers();
+        startLoadBalancer();
+
+        // the number of requests each client repeats
+        int repeatNum = 100;
+        Map<Integer, String> responses = new ConcurrentHashMap<>();
+        sendClientRequestOnNewThread(client1, "aa bb$ bb", resp -> responses.put(1, resp), repeatNum);
+        sendClientRequestOnNewThread(client2, "cc c cc cc dd", resp -> responses.put(2, resp), repeatNum);
+        sendClientRequestOnNewThread(client3, "eee eee kk eee kk", resp -> responses.put(3, resp), repeatNum);
+        sendClientRequestOnNewThread(client4, "aa aa bb", resp -> responses.put(4, resp), repeatNum);
+
+        // wait for all clients to get responses
+        while (responses.size() != 4) {
+        }
+
+        // both backend servers should get equal num of requests
+        int totalRequestNum = repeatNum * 4;
+        verify(service1, times(totalRequestNum / 2)).serve(any());
+        verify(service2, times(totalRequestNum / 2)).serve(any());
 
         // FIXME actually, the order of words shouldn't matter but I was to lazy to implement such check
         assertEquals("aa,1,bb,2,", responses.get(1));
@@ -116,8 +141,10 @@ class WoCoE2ETest {
     }
 
     private void startLoadBalancer() {
-        service1 = spy(new WoCoService(ADDRESS, PORT_S1));
-        service2 = spy(new WoCoService(ADDRESS, PORT_S2));
+        TCPClientRepo repo = new InMemoryTCPClientRepo();
+
+        service1 = spy(new WoCoService(ADDRESS, PORT_S1, repo));
+        service2 = spy(new WoCoService(ADDRESS, PORT_S2, repo));
         loadBalancer = new WoCoBalancer(ADDRESS, PORT_LB, 2, List.of(service1, service2));
 
         new Thread(loadBalancer::run).start();
@@ -127,11 +154,17 @@ class WoCoE2ETest {
         }
     }
 
-    private void sendClientRequestOnNewThread(TCPClient client, String request, Consumer<String> onResponse) {
+    private void sendClientRequestOnNewThread(TCPClient client, String request, Consumer<String> onResponse, int repeatNum) {
         new Thread(() -> {
             try {
-                String response = client.send(request);
-                onResponse.accept(response);
+                for (int i = 0; i < repeatNum; i++) {
+                    String response = client.send(request);
+
+                    // for test purposes: accept only last response
+                    if (i == repeatNum - 1) {
+                        onResponse.accept(response);
+                    }
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

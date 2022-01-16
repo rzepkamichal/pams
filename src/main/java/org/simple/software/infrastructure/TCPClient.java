@@ -1,6 +1,6 @@
 package org.simple.software.infrastructure;
 
-import org.simple.software.server.WoCoServer;
+import org.simple.software.protocol.Const;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,8 +32,11 @@ public class TCPClient {
             initialize();
         }
 
+        // remove all characters from the data, which belong to the protocol's semantics
+        data = data.replaceAll(Const.REQUEST_SEPARATOR_REGEXP, "");
+
         sOutput.write(data);
-        sOutput.write(WoCoServer.SEPARATOR);
+        sOutput.write(Const.REQUEST_SEPARATOR);
         sOutput.flush();
         String response = sInput.readLine();
 

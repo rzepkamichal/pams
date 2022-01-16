@@ -2,12 +2,12 @@ package org.simple.software.loadbalancer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.simple.software.infrastructure.InMemoryTCPClientRepo;
 import org.simple.software.infrastructure.ServerController;
 import org.simple.software.infrastructure.TCPClient;
+import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.infrastructure.TCPServer;
-import org.simple.software.infrastructure.ThreadedJobExecutor;
 import org.simple.software.protocol.Response;
-import org.simple.software.infrastructure.JobExecutor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -169,9 +169,11 @@ class WoCoBalancerIT {
         TCPServer server1 = new TCPServer("localhost", 26000, controller1);
         runServerOnNewThread(server1);
 
+        TCPClientRepo repo = new InMemoryTCPClientRepo();
+
         // client which calls duplicatingServer
         BackendService duplicatingService =
-                new WoCoService("localhost", 26000);
+                new WoCoService("localhost", 26000, repo);
 
         // the second service transforms the received data to upper case
         ServerController controller2 = req -> CompletableFuture.completedFuture(
@@ -181,7 +183,7 @@ class WoCoBalancerIT {
 
         // client which calls upperCase server
         BackendService upperCaseService =
-                new WoCoService("localhost", 26001);
+                new WoCoService("localhost", 26001, repo);
 
         // wait for services to set up
         //noinspection StatementWithEmptyBody
