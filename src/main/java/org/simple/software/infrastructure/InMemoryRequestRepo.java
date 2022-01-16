@@ -1,13 +1,12 @@
 package org.simple.software.infrastructure;
 
 import org.simple.software.protocol.Request;
-import org.simple.software.protocol.WoCoRequest;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RequestRepoImpl implements RequestRepo {
+public class InMemoryRequestRepo implements RequestRepo {
 
     Map<Integer, Request> requests = new HashMap<>();
 

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TagRemoverImplTest {
+class RegexpTagRemoverTest {
 
-    TagRemoverImpl tagRemover = new TagRemoverImpl();
+    RegexpTagRemover tagRemover = new RegexpTagRemover();
 
     @Test
     void removes_tags__case1() {

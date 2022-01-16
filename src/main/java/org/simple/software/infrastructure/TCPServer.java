@@ -38,7 +38,7 @@ public class TCPServer {
     private AtomicBoolean started = new AtomicBoolean(false);
     private AtomicBoolean keepRunning = new AtomicBoolean(false);
 
-    private RequestRepo pendingRequestRepo = new RequestRepoImpl();
+    private RequestRepo pendingRequestRepo = new InMemoryRequestRepo();
     private RequestFactory requestFactory = new WoCoRequestFactory();
     private ProcessingStatsRepo statsRepo = new StatsRepoImpl();
 

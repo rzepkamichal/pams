@@ -7,7 +7,7 @@ import org.simple.software.infrastructure.JobRepo;
 import org.simple.software.server.core.JobRepoImpl;
 import org.simple.software.server.core.ResultSerializer;
 import org.simple.software.server.core.TagRemover;
-import org.simple.software.server.core.TagRemoverImpl;
+import org.simple.software.server.core.RegexpTagRemover;
 import org.simple.software.server.core.WoCoServerController;
 import org.simple.software.server.core.WordCounter;
 import org.simple.software.server.core.WordCounterImpl;
@@ -38,7 +38,7 @@ public class WoCoServer {
         this.jobExecutor = new ThreadedJobExecutor(threadNum);
 
         // if tag removal disabled, then use just a default "input repeater"
-        this.tagRemover = removeTags ? new TagRemoverImpl() : str -> str;
+        this.tagRemover = removeTags ? new RegexpTagRemover() : str -> str;
 
         ServerController controller = new WoCoServerController(jobExecutor, tagRemover, wordCounter,
                 serializer, statsRepo, statsWriter);

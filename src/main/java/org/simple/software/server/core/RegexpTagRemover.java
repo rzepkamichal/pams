@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TagRemoverImpl implements TagRemover {
+public class RegexpTagRemover implements TagRemover {
 
     private static final String HTML_TAG = "(<)(.*?)(>)";
 
