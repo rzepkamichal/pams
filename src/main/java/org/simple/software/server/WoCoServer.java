@@ -3,8 +3,6 @@ package org.simple.software.server;
 import org.simple.software.infrastructure.ServerController;
 import org.simple.software.infrastructure.TCPServer;
 import org.simple.software.infrastructure.JobExecutor;
-import org.simple.software.infrastructure.JobRepo;
-import org.simple.software.server.core.JobRepoImpl;
 import org.simple.software.server.core.ResultSerializer;
 import org.simple.software.server.core.TagRemover;
 import org.simple.software.server.core.RegexpTagRemover;
@@ -31,7 +29,6 @@ public class WoCoServer {
     private final ProcessingStatsRepo statsRepo = new StatsRepoImpl();
     private final StatsWriter statsWriter;
     private final JobExecutor jobExecutor;
-    private final JobRepo jobRepo = new JobRepoImpl();
 
     private final TCPServer tcpServer;
 
