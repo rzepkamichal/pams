@@ -13,10 +13,10 @@ import org.simple.software.server.core.WordCounter;
 import org.simple.software.server.core.WordCounterImpl;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
 import org.simple.software.server.core.WoCoResultSerializer;
-import org.simple.software.server.stats.CSVStatsWriter;
-import org.simple.software.server.stats.ProcessingStatsRepo;
-import org.simple.software.server.stats.StatsRepoImpl;
-import org.simple.software.server.stats.StatsWriter;
+import org.simple.software.stats.CSVStatsWriter;
+import org.simple.software.stats.ProcessingStatsRepo;
+import org.simple.software.stats.StatsRepoImpl;
+import org.simple.software.stats.StatsWriter;
 
 import java.io.File;
 import java.io.IOException;

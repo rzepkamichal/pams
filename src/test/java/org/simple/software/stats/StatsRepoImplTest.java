@@ -1,4 +1,4 @@
-package org.simple.software.server.stats;
+package org.simple.software.stats;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

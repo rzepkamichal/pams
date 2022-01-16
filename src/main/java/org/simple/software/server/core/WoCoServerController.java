@@ -4,10 +4,10 @@ import org.simple.software.infrastructure.JobExecutor;
 import org.simple.software.infrastructure.ServerController;
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.Response;
-import org.simple.software.server.stats.ProcessingStats;
-import org.simple.software.server.stats.ProcessingStatsRepo;
-import org.simple.software.server.stats.StatsWriter;
-import org.simple.software.server.stats.TimedRunner;
+import org.simple.software.stats.ProcessingStats;
+import org.simple.software.stats.ProcessingStatsRepo;
+import org.simple.software.stats.StatsWriter;
+import org.simple.software.stats.TimedRunner;
 
 import java.util.concurrent.CompletableFuture;
 

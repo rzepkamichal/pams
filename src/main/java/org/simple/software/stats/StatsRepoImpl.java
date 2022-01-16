@@ -1,7 +1,4 @@
-package org.simple.software.server.stats;
-
-import org.simple.software.server.stats.ProcessingStats;
-import org.simple.software.server.stats.ProcessingStatsRepo;
+package org.simple.software.stats;
 
 import java.util.HashMap;
 import java.util.Map;

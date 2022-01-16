@@ -4,8 +4,8 @@ import org.simple.software.protocol.Request;
 import org.simple.software.protocol.RequestFactory;
 import org.simple.software.protocol.Response;
 import org.simple.software.protocol.WoCoRequestFactory;
-import org.simple.software.server.stats.ProcessingStatsRepo;
-import org.simple.software.server.stats.StatsRepoImpl;
+import org.simple.software.stats.ProcessingStatsRepo;
+import org.simple.software.stats.StatsRepoImpl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

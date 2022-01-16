@@ -1,4 +1,4 @@
-package org.simple.software.server.stats;
+package org.simple.software.stats;
 
 import java.util.List;
 import java.util.Locale;

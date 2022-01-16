@@ -1,4 +1,4 @@
-package org.simple.software.server.stats;
+package org.simple.software.stats;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
