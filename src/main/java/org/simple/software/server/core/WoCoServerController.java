@@ -4,6 +4,7 @@ import org.simple.software.infrastructure.JobExecutor;
 import org.simple.software.infrastructure.ServerController;
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.Response;
+import org.simple.software.server.ServerStats;
 import org.simple.software.stats.ProcessingStats;
 import org.simple.software.stats.ProcessingStatsRepo;
 import org.simple.software.stats.StatsWriter;
@@ -19,11 +20,11 @@ public class WoCoServerController implements ServerController {
     private final TagRemover tagRemover;
     private final WordCounter wordCounter;
     private final ResultSerializer serializer;
-    private final ProcessingStatsRepo statsRepo;
+    private final ProcessingStatsRepo<ServerStats> statsRepo;
     private final StatsWriter statsWriter;
 
     public WoCoServerController(JobExecutor jobExecutor, TagRemover tagRemover, WordCounter wordCounter,
-                                ResultSerializer serializer, ProcessingStatsRepo statsRepo, StatsWriter statsWriter) {
+                                ResultSerializer serializer, ProcessingStatsRepo<ServerStats> statsRepo, StatsWriter statsWriter) {
         this.jobExecutor = jobExecutor;
         this.tagRemover = tagRemover;
         this.wordCounter = wordCounter;
@@ -34,6 +35,8 @@ public class WoCoServerController implements ServerController {
 
     @Override
     public CompletableFuture<Response> handle(Request request) {
+        getClientStats(request.getClientId()).logTime(ServerStats.RECEIVE_TIME, request.getReceiveDuration());
+
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();
 
         WoCoJob job = createJob(request);
@@ -59,18 +62,21 @@ public class WoCoServerController implements ServerController {
     private WoCoJob createJob(Request request) {
         WoCoJob job = new WoCoJob(request, tagRemover, wordCounter);
 
-        ProcessingStats clientStats = statsRepo.getStatsByClient(request.getClientId());
-        job.setTagRemovalTimeLogListener(clientStats::logDocCleaningTime);
-        job.setWordCountTimeLogListener(clientStats::logWordCountTime);
+        ProcessingStats<ServerStats> clientStats = getClientStats(request.getClientId());
+        job.setTagRemovalTimeLogListener(time -> clientStats.logTime(ServerStats.TAG_REMOVAL_TIME, time));
+        job.setWordCountTimeLogListener(time -> clientStats.logTime(ServerStats.WORD_COUNT_TIME, time));
 
         return job;
     }
 
-
     private Response resultToResponse(WoCoResult result) {
-        ProcessingStats clientStats = statsRepo.getStatsByClient(result.getClientId());
-        String responseData = TimedRunner.run(() -> serializer.serialize(result), clientStats::logSerializationTime);
+        String responseData = TimedRunner.run(() -> serializer.serialize(result),
+                time -> getClientStats(result.getClientId()).logTime(ServerStats.RESPONSE_SERIALIZATION_TIME, time));
 
         return Response.of(responseData);
+    }
+
+    private ProcessingStats<ServerStats> getClientStats(int clientId) {
+        return statsRepo.getStatsByClient(clientId);
     }
 }

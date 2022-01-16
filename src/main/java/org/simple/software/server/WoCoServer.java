@@ -13,7 +13,7 @@ import org.simple.software.infrastructure.ThreadedJobExecutor;
 import org.simple.software.server.core.WoCoResultSerializer;
 import org.simple.software.stats.CSVStatsWriter;
 import org.simple.software.stats.ProcessingStatsRepo;
-import org.simple.software.stats.StatsRepoImpl;
+import org.simple.software.stats.InMemoryStatsRepo;
 import org.simple.software.stats.StatsWriter;
 
 import java.io.File;
@@ -26,7 +26,7 @@ public class WoCoServer {
     private final TagRemover tagRemover;
     private final WordCounter wordCounter = new WordCounterImpl();
     private final ResultSerializer serializer = new WoCoResultSerializer();
-    private final ProcessingStatsRepo statsRepo = new StatsRepoImpl();
+    private final ProcessingStatsRepo statsRepo = new InMemoryStatsRepo();
     private final StatsWriter statsWriter;
     private final JobExecutor jobExecutor;
 
@@ -45,7 +45,6 @@ public class WoCoServer {
                 serializer, statsRepo, statsWriter);
 
         tcpServer = new TCPServer(address, port, controller);
-        tcpServer.setStatsRepo(statsRepo);
     }
 
 

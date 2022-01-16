@@ -1,125 +1,64 @@
 package org.simple.software.stats;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Server processing time statistics.
  */
-public class ProcessingStats {
+public class ProcessingStats<KEY_TYPE> {
 
-    private final TimeAggregateStats docReceiveStats;
-    private final TimeAggregateStats docCleaningStats;
-    private final TimeAggregateStats wordCountStats;
-    private final TimeAggregateStats serializationTimeStats;
+    private final Map<KEY_TYPE, TimeAggregateStats> stats = new HashMap<>();
 
     public ProcessingStats() {
-        docReceiveStats = new TimeAggregateStats();
-        docCleaningStats = new TimeAggregateStats();
-        wordCountStats = new TimeAggregateStats();
-        serializationTimeStats = new TimeAggregateStats();
     }
 
-    private ProcessingStats(TimeAggregateStats docReceiveStats, TimeAggregateStats docCleaningStats, TimeAggregateStats wordCountStats, TimeAggregateStats serializationTimeStats) {
-        this.docReceiveStats = docReceiveStats;
-        this.docCleaningStats = docCleaningStats;
-        this.wordCountStats = wordCountStats;
-        this.serializationTimeStats = serializationTimeStats;
+    private ProcessingStats(Map<KEY_TYPE, TimeAggregateStats> other) {
+        stats.putAll(other);
     }
 
-    private void logTime(long elapsedTime, TimeAggregateStats targetStats) {
+    public void logTime(KEY_TYPE logName, long elapsedTime) {
+        TimeAggregateStats targetStats = findOrCreateStats(logName);
         targetStats.addRecord(elapsedTime);
     }
-    
-    public void logDocReceiveTime(long elapsedTime) {
-        logTime(elapsedTime, docReceiveStats);
-    }
-    
-    public void logDocCleaningTime(long elapsedTime) {
-        logTime(elapsedTime, docCleaningStats);
-    }
 
-    public void logWordCountTime(long elapsedTime) {
-        logTime(elapsedTime, wordCountStats);
-    }
+    private TimeAggregateStats findOrCreateStats(KEY_TYPE logName) {
+        TimeAggregateStats targetStats = stats.get(logName);
 
-    public void logSerializationTime(long elapsedTime) {
-        logTime(elapsedTime, serializationTimeStats);
+        if (targetStats == null) {
+            targetStats = new TimeAggregateStats();
+            stats.put(logName, targetStats);
+        }
+
+        return targetStats;
     }
 
-    public ProcessingStats join(ProcessingStats other) {
-        TimeAggregateStats joinedDocReceiveStats = docReceiveStats.join(other.docReceiveStats);
-        TimeAggregateStats joinedDocCleaningStats = docCleaningStats.join(other.docCleaningStats);
-        TimeAggregateStats joinedWordCountStats = wordCountStats.join(other.wordCountStats);
-        TimeAggregateStats joinedSerializationStats = serializationTimeStats.join(other.serializationTimeStats);
+    public ProcessingStats<KEY_TYPE> join(ProcessingStats<KEY_TYPE> other) {
+        final Map<KEY_TYPE, TimeAggregateStats> joinedStats = new HashMap<>();
 
-        return new ProcessingStats(
-                joinedDocReceiveStats,
-                joinedDocCleaningStats,
-                joinedWordCountStats,
-                joinedSerializationStats
-        );
+        other.stats.keySet()
+                .forEach(otherKey ->
+                        joinedStats.put(
+                                otherKey,
+                                findOrCreateStats(otherKey).join(other.stats.get(otherKey))
+                        )
+                );
+
+        return new ProcessingStats<>(joinedStats);
     }
 
-    /**
-     * @return Time spent on receiving a document from client in nanoseconds.
-     */
-    public double getAvgDocReceiveTime() {
-        return docReceiveStats.getAvg();
+
+    public double getAvg(KEY_TYPE logName) {
+        return findOrCreateStats(logName).getAvg();
     }
 
-    /**
-     *
-     * @return Time spent on cleaning a document from HTML tags in nanoseconds.
-     */
-    public double getAvgDocCleaningTime() {
-        return docCleaningStats.getAvg();
+    public List<Double> get100Percentiles(KEY_TYPE logName) {
+        return findOrCreateStats(logName).get100Percentiles();
     }
 
-    /**
-     *
-     * @return Time spent on counting words in nanoseconds.
-     */
-    public double getAvgWordCountTime() {
-        return wordCountStats.getAvg();
-    }
-
-    /**
-     *
-     * @return Time spent on serializing the response for clients in nanoseconds.
-     */
-    public double getAvgSerializationTime() {
-        return serializationTimeStats.getAvg();
-    }
-
-    public List<Double> getReceiveTimePercentiles() {
-        return docReceiveStats.get100Percentiles();
-    }
-
-    public List<Double> getDocCleaningTimePercentiles() {
-        return docCleaningStats.get100Percentiles();
-    }
-
-    public List<Double> getWordCountTimePercentiles() {
-        return wordCountStats.get100Percentiles();
-    }
-
-    public List<Double> getSerializationTimePercentiles() {
-        return serializationTimeStats.get100Percentiles();
-    }
-
-    public List<Double> getReceiveTimeRecords() {
-        return docReceiveStats.getAllRecords();
-    }
-
-    public List<Double> getDocCleaningTimeRecords() {
-        return docCleaningStats.getAllRecords();
-    }
-
-    public List<Double> getWordCountTimeRecords() {
-        return wordCountStats.getAllRecords();
-    }
-
-    public List<Double> getSerializationTimeRecords() {
-        return serializationTimeStats.getAllRecords();
+    public List<Double> getAllRecords(KEY_TYPE logName) {
+        return findOrCreateStats(logName).getAllRecords();
     }
 }
+

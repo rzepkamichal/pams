@@ -4,8 +4,6 @@ import org.simple.software.protocol.Request;
 import org.simple.software.protocol.RequestFactory;
 import org.simple.software.protocol.Response;
 import org.simple.software.protocol.WoCoRequestFactory;
-import org.simple.software.stats.ProcessingStatsRepo;
-import org.simple.software.stats.StatsRepoImpl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -40,7 +38,6 @@ public class TCPServer {
 
     private RequestRepo pendingRequestRepo = new InMemoryRequestRepo();
     private RequestFactory requestFactory = new WoCoRequestFactory();
-    private ProcessingStatsRepo statsRepo = new StatsRepoImpl();
 
     private final Set<Integer> servicedClients = new HashSet<>();
 
@@ -106,9 +103,8 @@ public class TCPServer {
                             }
 
                             pendingRequestRepo.removeByClientId(clientId);
-                            statsRepo.getStatsByClient(clientId).logDocReceiveTime(request.getReceiveTime());
                             controller.handle(request)
-                                    .thenAccept(response -> sendResponse(client, response));
+                                    .thenAccept(response -> sendResponse(client, request, response));
                         }
 
                     } else {
@@ -165,9 +161,7 @@ public class TCPServer {
         return pendingRequestRepo.save(request);
     }
 
-    private void sendResponse(SocketChannel client, Response response) {
-        //ProcessingStats clientStats = statsRepo.getStatsByClient(getClientId(client));
-        //String response = TimedRunner.run(() -> serializer.serialize(result), clientStats::logSerializationTime);
+    private void sendResponse(SocketChannel client, Request request, Response response) {
 
         String rawResponse = response.getData() + "\n";
         ByteBuffer ba = ByteBuffer.wrap(rawResponse.getBytes());
@@ -187,10 +181,6 @@ public class TCPServer {
 
     public void setRequestFactory(RequestFactory requestFactory) {
         this.requestFactory = requestFactory;
-    }
-
-    public void setStatsRepo(ProcessingStatsRepo statsRepo) {
-        this.statsRepo = statsRepo;
     }
 
     public boolean isReady() {

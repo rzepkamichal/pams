@@ -1,7 +1,7 @@
 package org.simple.software.stats;
 
-public interface ProcessingStatsRepo {
+public interface ProcessingStatsRepo<KEY_TYPE> {
 
-    ProcessingStats getStatsByClient(int clientId);
-    ProcessingStats getAcummulativeStats();
+    ProcessingStats<KEY_TYPE> getStatsByClient(int clientId);
+    ProcessingStats<KEY_TYPE> getAcummulativeStats();
 }

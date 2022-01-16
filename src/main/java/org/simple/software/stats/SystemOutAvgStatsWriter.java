@@ -1,13 +1,20 @@
 package org.simple.software.stats;
 
+import org.simple.software.server.ServerStats;
+
 import java.util.List;
 import java.util.Locale;
 
+import static org.simple.software.server.ServerStats.RECEIVE_TIME;
+import static org.simple.software.server.ServerStats.RESPONSE_SERIALIZATION_TIME;
+import static org.simple.software.server.ServerStats.TAG_REMOVAL_TIME;
+import static org.simple.software.server.ServerStats.WORD_COUNT_TIME;
+
 public class SystemOutAvgStatsWriter implements StatsWriter {
 
-    private final ProcessingStatsRepo statsRepo;
+    private final ProcessingStatsRepo<ServerStats> statsRepo;
 
-    public SystemOutAvgStatsWriter(ProcessingStatsRepo statsRepo) {
+    public SystemOutAvgStatsWriter(ProcessingStatsRepo<ServerStats> statsRepo) {
         this.statsRepo = statsRepo;
     }
 
@@ -24,23 +31,23 @@ public class SystemOutAvgStatsWriter implements StatsWriter {
         writeStats(statsRepo.getAcummulativeStats());
     }
 
-    private void writeStats(ProcessingStats stats) {
-        System.out.format(Locale.US, "Avg request receive time [ms]: %.4f\n", getMillis(stats.getAvgDocReceiveTime()));
-        System.out.format(Locale.US, "Avg tag removal time [ms]: %.4f\n", getMillis(stats.getAvgDocCleaningTime()));
-        System.out.format(Locale.US, "Avg word count time [ms]: %.4f\n", getMillis(stats.getAvgWordCountTime()));
-        System.out.format(Locale.US, "Avg result serialization time [ms]: %.4f\n", getMillis(stats.getAvgSerializationTime()));
+    private void writeStats(ProcessingStats<ServerStats> stats) {
+        System.out.format(Locale.US, "Avg request receive time [ms]: %.4f\n", getMillis(stats.getAvg(RECEIVE_TIME)));
+        System.out.format(Locale.US, "Avg tag removal time [ms]: %.4f\n", getMillis(stats.getAvg(TAG_REMOVAL_TIME)));
+        System.out.format(Locale.US, "Avg word count time [ms]: %.4f\n", getMillis(stats.getAvg(WORD_COUNT_TIME)));
+        System.out.format(Locale.US, "Avg result serialization time [ms]: %.4f\n", getMillis(stats.getAvg(RESPONSE_SERIALIZATION_TIME)));
         System.out.println();
         System.out.println("Percentiles request receive time [ms]");
-        writePercentiles(stats.getReceiveTimePercentiles());
+        writePercentiles(stats.get100Percentiles(RECEIVE_TIME));
         System.out.println();
         System.out.println("Percentiles tag removal time [ms]");
-        writePercentiles(stats.getDocCleaningTimePercentiles());
+        writePercentiles(stats.get100Percentiles(TAG_REMOVAL_TIME));
         System.out.println();
         System.out.println("Percentiles word count time [ms]");
-        writePercentiles(stats.getWordCountTimePercentiles());
+        writePercentiles(stats.get100Percentiles(WORD_COUNT_TIME));
         System.out.println();
         System.out.println("Percentiles result serialization time [ms]");
-        writePercentiles(stats.getSerializationTimePercentiles());
+        writePercentiles(stats.get100Percentiles(RESPONSE_SERIALIZATION_TIME));
         System.out.println("--------------------------------------------------------------------------");
         System.out.println();
     }
