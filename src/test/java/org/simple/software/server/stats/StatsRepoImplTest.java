@@ -30,8 +30,8 @@ class StatsRepoImplTest {
         double expectedAvgWordCountTime = 100.0 / 4.0;
         double expectedAvgDocReceiveTime = 120.0 / 5.0;
 
-        double avgWordCountTime = repo.getAverageStats().getAvgWordCountTime();
-        double avgDocReceiveTime = repo.getAverageStats().getAvgDocReceiveTime();
+        double avgWordCountTime = repo.getAcummulativeStats().getAvgWordCountTime();
+        double avgDocReceiveTime = repo.getAcummulativeStats().getAvgDocReceiveTime();
 
         assertEquals(expectedAvgWordCountTime, avgWordCountTime);
         assertEquals(expectedAvgDocReceiveTime, avgDocReceiveTime);

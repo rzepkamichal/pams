@@ -32,7 +32,7 @@ class TimeAggregateStatsTest {
             stats.addRecord(100 - i);
         }
 
-        var percentiles = stats.getPercentiles();
+        var percentiles = stats.get100Percentiles();
         assertEquals(1.0, percentiles.get(0));
         assertEquals(25.0, percentiles.get(24));
         assertEquals(50.0, percentiles.get(49));

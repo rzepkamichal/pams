@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class TimeAggregateStats {
 
@@ -41,7 +42,7 @@ class TimeAggregateStats {
         return result;
     }
 
-    public List<Double> getPercentiles() {
+    public List<Double> get100Percentiles() {
         // use array list to access values faster
         List<Long> stats = new ArrayList<>(timeStats);
         Collections.sort(stats);
@@ -57,4 +58,12 @@ class TimeAggregateStats {
 
         return percentiles;
     }
+
+    public List<Double> getAllRecords() {
+        return timeStats.stream()
+                .map(Long::doubleValue)
+                .collect(Collectors.toList());
+    }
+
+
 }

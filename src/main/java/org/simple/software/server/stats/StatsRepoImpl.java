@@ -22,7 +22,7 @@ public class StatsRepoImpl implements ProcessingStatsRepo {
     }
 
     @Override
-    public ProcessingStats getAverageStats() {
+    public ProcessingStats getAcummulativeStats() {
         return clientStats.values()
                 .stream()
                 .reduce(new ProcessingStats(), ProcessingStats::join);

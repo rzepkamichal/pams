@@ -21,7 +21,7 @@ public class SystemOutAvgStatsWriter implements StatsWriter {
     @Override
     public void writeTotal() {
         System.out.println("------------------------ Total server statistics --------------------------");
-        writeStats(statsRepo.getAverageStats());
+        writeStats(statsRepo.getAcummulativeStats());
     }
 
     private void writeStats(ProcessingStats stats) {

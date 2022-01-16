@@ -92,18 +92,34 @@ public class ProcessingStats {
     }
 
     public List<Double> getReceiveTimePercentiles() {
-        return docReceiveStats.getPercentiles();
+        return docReceiveStats.get100Percentiles();
     }
 
     public List<Double> getDocCleaningTimePercentiles() {
-        return docCleaningStats.getPercentiles();
+        return docCleaningStats.get100Percentiles();
     }
 
     public List<Double> getWordCountTimePercentiles() {
-        return wordCountStats.getPercentiles();
+        return wordCountStats.get100Percentiles();
     }
 
     public List<Double> getSerializationTimePercentiles() {
-        return serializationTimeStats.getPercentiles();
+        return serializationTimeStats.get100Percentiles();
+    }
+
+    public List<Double> getReceiveTimeRecords() {
+        return docReceiveStats.getAllRecords();
+    }
+
+    public List<Double> getDocCleaningTimeRecords() {
+        return docCleaningStats.getAllRecords();
+    }
+
+    public List<Double> getWordCountTimeRecords() {
+        return wordCountStats.getAllRecords();
+    }
+
+    public List<Double> getSerializationTimeRecords() {
+        return serializationTimeStats.getAllRecords();
     }
 }
