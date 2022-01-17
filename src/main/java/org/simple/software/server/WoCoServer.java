@@ -41,10 +41,10 @@ public class WoCoServer {
         // if tag removal disabled, then use just a default "input repeater"
         this.tagRemover = removeTags ? new RegexpTagRemover() : str -> str;
 
-        String logsDirPath = "." + File.separator + "log-" + address + "-" + port;
-        statsWriter = new ServerStatsCSVWriter(logsDirPath, statsRepo);
-
         measurementService = new DefaultIntervalMeasurementService(statsRepo, MEASUREMENT_INTERVAL_MS);
+
+        String logsDirPath = "." + File.separator + "log-" + address + "-" + port;
+        statsWriter = new ServerStatsCSVWriter(logsDirPath, statsRepo, measurementService);
 
         WoCoServerController controller = new WoCoServerController(jobExecutor, tagRemover,
                 wordCounter, serializer);

@@ -5,11 +5,14 @@ import org.simple.software.stats.IntervalMeasurement;
 import org.simple.software.stats.ProcessingStatsRepo;
 import org.simple.software.stats.IntervalMeasurementService;
 import org.simple.software.stats.StatsWriter;
-import org.simple.software.stats.TimedRunner;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
+
+import static org.simple.software.stats.TimeUtils.doubleFreqPerNanoToFreqPerSec;
+import static org.simple.software.stats.TimeUtils.doubleNanoTimeToMs;
+import static org.simple.software.stats.TimeUtils.longNanoTimeToSec;
 
 public class LBStatsCSVWriter implements StatsWriter {
 
@@ -71,22 +74,6 @@ public class LBStatsCSVWriter implements StatsWriter {
 
     private String doubleToCSVValue(Double value) {
         return String.format(Locale.US, "%.2f", value);
-    }
-
-    private double longNanoTimeToMs(Long time) {
-        return time * TimedRunner.PRECISION * 1000;
-    }
-
-    private double doubleNanoTimeToMs(Double time) {
-        return time * TimedRunner.PRECISION * 1000;
-    }
-
-    private double longNanoTimeToSec(Long time) {
-        return time * TimedRunner.PRECISION;
-    }
-
-    private double doubleFreqPerNanoToFreqPerSec(Double frequency) {
-        return frequency / TimedRunner.PRECISION;
     }
 
 

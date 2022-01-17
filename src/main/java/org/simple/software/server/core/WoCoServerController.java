@@ -45,7 +45,7 @@ public class WoCoServerController implements ServerController {
         job.setOnComplete(result -> {
             futureResponse.complete(resultToResponse(result));
             long totalResponseTime = System.nanoTime() - request.getReceiveTime();
-            getClientStats(request.getClientId()).logTime(ServerStats.RECEIVE_TIME, totalResponseTime);
+            getClientStats(request.getClientId()).logTime(ServerStats.RESPONSE_TIME, totalResponseTime);
         });
 
         jobExecutor.execute(job);
