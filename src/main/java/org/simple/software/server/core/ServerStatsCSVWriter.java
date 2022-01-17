@@ -19,13 +19,14 @@ import static org.simple.software.server.ServerStats.TAG_REMOVAL_TIME;
 import static org.simple.software.server.ServerStats.WORD_COUNT_TIME;
 import static org.simple.software.stats.TimeUtils.doubleFreqPerNanoToFreqPerSec;
 import static org.simple.software.stats.TimeUtils.doubleNanoTimeToMs;
+import static org.simple.software.stats.TimeUtils.doubleNanoTimeToSec;
 import static org.simple.software.stats.TimeUtils.longNanoTimeToSec;
 
 public class ServerStatsCSVWriter implements StatsWriter {
 
     private final Logger log = Logger.getLogger(getClass().getName());
 
-    public static final String FILE_AVG_STATS = "avg-stats.csv";
+    public static final String FILE_AVG_STATS = "total.csv";
     public static final String FILE_PERCENTILES = "percentiles.csv";
     public static final String FILE_INTERVALS = "intervals.csv";
 
@@ -62,22 +63,39 @@ public class ServerStatsCSVWriter implements StatsWriter {
     @Override
     public void writeTotal() {
         log.info("Writing stats");
-        writeAvgStats();
+        writeTotalStats();
         writePercentiles();
         writeIntervals();
         log.info("Writing stats: done");
     }
 
-    private void writeAvgStats() {
+    private void writeTotalStats() {
         double avgReceiveTime = statsRepo.getAcummulativeStats().getAvg(RECEIVE_TIME);
         double avgTagRemovalTime = statsRepo.getAcummulativeStats().getAvg(TAG_REMOVAL_TIME);
         double avgWordCountTime = statsRepo.getAcummulativeStats().getAvg(WORD_COUNT_TIME);
         double avgSerializationTime = statsRepo.getAcummulativeStats().getAvg(RESPONSE_SERIALIZATION_TIME);
         double avgResponseTime = statsRepo.getAcummulativeStats().getAvg(RESPONSE_TIME);
-        Record record = new Record(avgReceiveTime, avgTagRemovalTime, avgWordCountTime, avgSerializationTime, avgResponseTime);
+        double totalTime = getTotalTime();
+        double totalTput = getTotalTput(totalTime);
+
+        Record record = new Record(avgReceiveTime, avgTagRemovalTime, avgWordCountTime,
+                avgSerializationTime, avgResponseTime, totalTime, totalTput);
+
         String header = ATTR_RECEIVE_TIME + CSV.SEPARATOR + ATTR_TAG_REMOVAL_TIME + CSV.SEPARATOR
-                + ATTR_WORD_COUNT_TIME + CSV.SEPARATOR + ATTR_SERIALIZATION_TIME + CSV.SEPARATOR + ATTR_RESPONSE_TIME;
-        CSV.writeToFile(logsDirPath, FILE_AVG_STATS, header, List.of(record), this::recordToCSVLine);
+                + ATTR_WORD_COUNT_TIME + CSV.SEPARATOR + ATTR_SERIALIZATION_TIME + CSV.SEPARATOR
+                + ATTR_RESPONSE_TIME + CSV.SEPARATOR + ATTRIB_TIME + CSV.SEPARATOR + ATTRIB_TPUT;
+        CSV.writeToFile(logsDirPath, FILE_AVG_STATS, header, List.of(record), this::processStatRecordToCSVLineWithTput);
+    }
+
+    private double getTotalTime() {
+        final long measurementStartTime = measurementService.getStartTimestamp();
+        final long lastMeasurementTime = measurementService.getLastMeasurementTimestamp();
+        return lastMeasurementTime - measurementStartTime;
+    }
+
+    private double getTotalTput(double totalTime) {
+        final int successCount = statsRepo.getAcummulativeStats().getAllRecords(RESPONSE_TIME).size();
+        return 1.0 * successCount / totalTime;
     }
 
     private void writePercentiles() {
@@ -91,14 +109,14 @@ public class ServerStatsCSVWriter implements StatsWriter {
 
         for (int i = 0; i < 100; i++) {
             Record record = new Record(receiveTimePercentiles.get(i), tagRemovalPercentiles.get(i),
-                    wordCountPercentiles.get(i), serializationTimePercentiles.get(i), responseTimePercentiles.get(i));
+                    wordCountPercentiles.get(i), serializationTimePercentiles.get(i), responseTimePercentiles.get(i), -1L, -1L);
             records.add(record);
         }
 
         String header = ATTR_RECEIVE_TIME + CSV.SEPARATOR + ATTR_TAG_REMOVAL_TIME + CSV.SEPARATOR
                 + ATTR_WORD_COUNT_TIME + CSV.SEPARATOR + ATTR_SERIALIZATION_TIME + CSV.SEPARATOR + ATTR_RESPONSE_TIME;
 
-        CSV.writeToFile(logsDirPath, FILE_PERCENTILES, header, records, this::recordToCSVLine);
+        CSV.writeToFile(logsDirPath, FILE_PERCENTILES, header, records, this::processStatRecordToCSVLineWithoutTput);
     }
 
     private void writeIntervals() {
@@ -109,7 +127,7 @@ public class ServerStatsCSVWriter implements StatsWriter {
                 measurement -> intervalMeasurementToCSVLine(measurement, measurementStartTime));
     }
 
-    private String recordToCSVLine(Record record) {
+    private String processStatRecordToCSVLineWithoutTput(Record record) {
         double receiveTime = doubleNanoTimeToMs(record.getReceiveTime());
         double tagRemovalTime = doubleNanoTimeToMs(record.getTagRemovalTime());
         double wordCountTime = doubleNanoTimeToMs(record.getWordCountTime());
@@ -122,6 +140,26 @@ public class ServerStatsCSVWriter implements StatsWriter {
                 wordCountTime, CSV.SEPARATOR,
                 serializationTime, CSV.SEPARATOR,
                 responseTime
+        );
+    }
+
+    private String processStatRecordToCSVLineWithTput(Record record) {
+        double receiveTime = doubleNanoTimeToMs(record.getReceiveTime());
+        double tagRemovalTime = doubleNanoTimeToMs(record.getTagRemovalTime());
+        double wordCountTime = doubleNanoTimeToMs(record.getWordCountTime());
+        double serializationTime = doubleNanoTimeToMs(record.getSerializationTime());
+        double responseTime = doubleNanoTimeToMs(record.getResponseTime());
+        double totalTime = doubleNanoTimeToSec(record.getTotalTime());
+        double totalTput = doubleFreqPerNanoToFreqPerSec(record.getTotalTput());
+
+        return String.format(Locale.US, "%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f",
+                receiveTime, CSV.SEPARATOR,
+                tagRemovalTime, CSV.SEPARATOR,
+                wordCountTime, CSV.SEPARATOR,
+                serializationTime, CSV.SEPARATOR,
+                responseTime, CSV.SEPARATOR,
+                totalTime, CSV.SEPARATOR,
+                totalTput
         );
     }
 
@@ -139,13 +177,17 @@ public class ServerStatsCSVWriter implements StatsWriter {
         final double wordCountTime;
         final double serializationTime;
         final double responseTime;
+        final double totalTime;
+        final double totalTput;
 
-        public Record(double receiveTime, double tagRemovalTime, double wordCountTime, double serializationTime, double responseTime) {
+        public Record(double receiveTime, double tagRemovalTime, double wordCountTime, double serializationTime, double responseTime, double totalTime, double totalTput) {
             this.receiveTime = receiveTime;
             this.tagRemovalTime = tagRemovalTime;
             this.wordCountTime = wordCountTime;
             this.serializationTime = serializationTime;
             this.responseTime = responseTime;
+            this.totalTime = totalTime;
+            this.totalTput = totalTput;
         }
 
         public double getReceiveTime() {
@@ -166,6 +208,14 @@ public class ServerStatsCSVWriter implements StatsWriter {
 
         public double getResponseTime() {
             return responseTime;
+        }
+
+        public double getTotalTime() {
+            return totalTime;
+        }
+
+        public double getTotalTput() {
+            return totalTput;
         }
     }
 

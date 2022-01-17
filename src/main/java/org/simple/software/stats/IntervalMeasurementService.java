@@ -10,6 +10,7 @@ public interface IntervalMeasurementService {
     List<IntervalMeasurement> getMeasurements();
     IntervalMeasurement measureLatestInterval();
     long getStartTimestamp();
+    long getLastMeasurementTimestamp();
 
     IntervalMeasurementService EMPTY = new IntervalMeasurementService() {
         @Override
@@ -32,6 +33,11 @@ public interface IntervalMeasurementService {
 
         @Override
         public long getStartTimestamp() {
+            return 0;
+        }
+
+        @Override
+        public long getLastMeasurementTimestamp() {
             return 0;
         }
     };

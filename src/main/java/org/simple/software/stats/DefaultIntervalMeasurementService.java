@@ -64,9 +64,15 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
     }
 
     @Override
+    public long getLastMeasurementTimestamp() {
+        return latestMeasurementTimestamp;
+    }
+
+    @Override
     public List<IntervalMeasurement> getMeasurements() {
         return Collections.unmodifiableList(measurements);
     }
+
 
     @Override
     public IntervalMeasurement measureLatestInterval() {
