@@ -5,6 +5,7 @@ import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.infrastructure.TCPServer;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
 import org.simple.software.stats.InMemoryStatsRepo;
+import org.simple.software.stats.ProcessingStatsRepo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,7 +34,8 @@ public class WoCoBalancer {
                 new ThreadedJobExecutor(threadNum),
                 tcpClientRepo);
 
-        controller.setStatsRepo(new InMemoryStatsRepo<>());
+        LBStatsRepo statsRepo = new LBStatsRepo();
+        controller.setStatsRepo(statsRepo);
 
         server = new TCPServer(address, port, controller);
     }

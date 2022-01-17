@@ -2,10 +2,12 @@ package org.simple.software.stats;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryStatsRepo<KEY_TYPE> implements ProcessingStatsRepo<KEY_TYPE> {
 
-    private final Map<Integer, ProcessingStats<KEY_TYPE>> clientStats = new HashMap<>();
+    protected final Map<Integer, ProcessingStats<KEY_TYPE>> clientStats = new ConcurrentHashMap<>();
 
     @Override
     public ProcessingStats<KEY_TYPE> getStatsByClient(int clientId) {
@@ -24,4 +26,5 @@ public class InMemoryStatsRepo<KEY_TYPE> implements ProcessingStatsRepo<KEY_TYPE
                 .stream()
                 .reduce(new ProcessingStats<>(), ProcessingStats::join);
     }
+
 }

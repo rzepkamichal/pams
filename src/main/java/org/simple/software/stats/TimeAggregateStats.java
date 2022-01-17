@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class TimeAggregateStats {
 
-    private final List<Long> timeStats = new LinkedList<>();
+    private final List<Long> timeStats = Collections.synchronizedList(new LinkedList<>());
     private long sum = 0;
 
     public TimeAggregateStats() {
@@ -59,10 +58,8 @@ class TimeAggregateStats {
         return percentiles;
     }
 
-    public List<Double> getAllRecords() {
-        return timeStats.stream()
-                .map(Long::doubleValue)
-                .collect(Collectors.toList());
+    public List<Long> getAllRecords() {
+        return new LinkedList<>(timeStats);
     }
 
 

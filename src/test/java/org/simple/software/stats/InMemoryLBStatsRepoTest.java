@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.simple.software.server.ServerStats.RECEIVE_TIME;
 import static org.simple.software.server.ServerStats.WORD_COUNT_TIME;
 
-class InMemoryStatsRepoTest {
+class InMemoryLBStatsRepoTest {
 
     InMemoryStatsRepo<ServerStats> repo;
 

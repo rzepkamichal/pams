@@ -62,7 +62,7 @@ public class CSVStatsWriter implements StatsWriter {
         log.info("Writing stats: done");
     }
 
-    void writeSingleStats(String fileName, String statName, List<Double> dataRecords) {
+    void writeSingleStats(String fileName, String statName, List<Long> dataRecords) {
         File directory = new File(logsDirPath);
 
         if (!directory.exists()){

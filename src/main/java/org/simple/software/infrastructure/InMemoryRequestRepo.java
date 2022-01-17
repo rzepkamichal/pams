@@ -2,13 +2,13 @@ package org.simple.software.infrastructure;
 
 import org.simple.software.protocol.Request;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryRequestRepo implements RequestRepo {
 
-    Map<Integer, Request> requests = new HashMap<>();
+    Map<Integer, Request> requests = new ConcurrentHashMap<>();
 
     @Override
     public Optional<Request> getByClientId(int clientId) {

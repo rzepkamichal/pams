@@ -3,13 +3,14 @@ package org.simple.software.stats;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Server processing time statistics.
  */
 public class ProcessingStats<KEY_TYPE> {
 
-    private final Map<KEY_TYPE, TimeAggregateStats> stats = new HashMap<>();
+    private final Map<KEY_TYPE, TimeAggregateStats> stats = new ConcurrentHashMap<>();
 
     public ProcessingStats() {
     }
@@ -57,7 +58,7 @@ public class ProcessingStats<KEY_TYPE> {
         return findOrCreateStats(logName).get100Percentiles();
     }
 
-    public List<Double> getAllRecords(KEY_TYPE logName) {
+    public List<Long> getAllRecords(KEY_TYPE logName) {
         return findOrCreateStats(logName).getAllRecords();
     }
 }
