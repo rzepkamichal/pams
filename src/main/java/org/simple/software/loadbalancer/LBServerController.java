@@ -38,7 +38,7 @@ class LBServerController implements ServerController {
 
         jobExecutor.execute(() -> {
             Response response = service.serve(request);
-            long systemResponseTime = System.nanoTime() - request.getReadyTime();
+            long systemResponseTime = System.nanoTime() - request.getReceiveTime();
             statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
             futureResponse.complete(response);
         });

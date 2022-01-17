@@ -5,6 +5,8 @@ import org.simple.software.infrastructure.ServerController;
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.Response;
 import org.simple.software.server.ServerStats;
+import org.simple.software.stats.InMemoryStatsRepo;
+import org.simple.software.stats.IntervalMeasurementService;
 import org.simple.software.stats.ProcessingStats;
 import org.simple.software.stats.ProcessingStatsRepo;
 import org.simple.software.stats.StatsWriter;
@@ -20,17 +22,17 @@ public class WoCoServerController implements ServerController {
     private final TagRemover tagRemover;
     private final WordCounter wordCounter;
     private final ResultSerializer serializer;
-    private final ProcessingStatsRepo<ServerStats> statsRepo;
-    private final StatsWriter statsWriter;
 
-    public WoCoServerController(JobExecutor jobExecutor, TagRemover tagRemover, WordCounter wordCounter,
-                                ResultSerializer serializer, ProcessingStatsRepo<ServerStats> statsRepo, StatsWriter statsWriter) {
+    private IntervalMeasurementService measurementSvc = IntervalMeasurementService.EMPTY;
+    private ProcessingStatsRepo<ServerStats> statsRepo = new InMemoryStatsRepo<>();
+    private StatsWriter statsWriter = StatsWriter.EMPTY;
+
+    public WoCoServerController(JobExecutor jobExecutor, TagRemover tagRemover,
+                                WordCounter wordCounter, ResultSerializer serializer) {
         this.jobExecutor = jobExecutor;
         this.tagRemover = tagRemover;
         this.wordCounter = wordCounter;
         this.serializer = serializer;
-        this.statsRepo = statsRepo;
-        this.statsWriter = statsWriter;
     }
 
     @Override
@@ -40,7 +42,11 @@ public class WoCoServerController implements ServerController {
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();
 
         WoCoJob job = createJob(request);
-        job.setOnComplete(result -> futureResponse.complete(resultToResponse(result)));
+        job.setOnComplete(result -> {
+            futureResponse.complete(resultToResponse(result));
+            long totalResponseTime = System.nanoTime() - request.getReceiveTime();
+            getClientStats(request.getClientId()).logTime(ServerStats.RECEIVE_TIME, totalResponseTime);
+        });
 
         jobExecutor.execute(job);
 
@@ -56,6 +62,7 @@ public class WoCoServerController implements ServerController {
 
     @Override
     public void onIdle() {
+        measurementSvc.stop();
         statsWriter.writeTotal();
     }
 
@@ -78,5 +85,17 @@ public class WoCoServerController implements ServerController {
 
     private ProcessingStats<ServerStats> getClientStats(int clientId) {
         return statsRepo.getStatsByClient(clientId);
+    }
+
+    public void setStatsRepo(ProcessingStatsRepo<ServerStats> statsRepo) {
+        this.statsRepo = statsRepo;
+    }
+
+    public void setStatsWriter(StatsWriter statsWriter) {
+        this.statsWriter = statsWriter;
+    }
+
+    public void setMeasurementSvc(IntervalMeasurementService measurementSvc) {
+        this.measurementSvc = measurementSvc;
     }
 }
