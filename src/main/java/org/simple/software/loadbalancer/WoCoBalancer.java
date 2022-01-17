@@ -4,9 +4,10 @@ import org.simple.software.infrastructure.InMemoryTCPClientRepo;
 import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.infrastructure.TCPServer;
 import org.simple.software.infrastructure.ThreadedJobExecutor;
-import org.simple.software.stats.InMemoryStatsRepo;
-import org.simple.software.stats.ProcessingStatsRepo;
+import org.simple.software.stats.DefaultIntervalMeasurementService;
+import org.simple.software.stats.StatsWriter;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
@@ -19,6 +20,8 @@ public class WoCoBalancer {
     private static final Logger log = Logger.getLogger(WoCoBalancer.class.getName());
 
     private final TCPServer server;
+    private final DefaultIntervalMeasurementService measurementService;
+    private final StatsWriter statsWriter;
 
     // The backend services use a shared repo of TCPClients.
     // The load balancer maintains a separate TCPClient (socket) for each WoCoClient.
@@ -35,7 +38,13 @@ public class WoCoBalancer {
                 tcpClientRepo);
 
         LBStatsRepo statsRepo = new LBStatsRepo();
+        measurementService = new DefaultIntervalMeasurementService(statsRepo, 200);
+
+        String logsDirPath = "." + File.separator + "log-loadbalancer";
+        statsWriter = new LBStatsCSVWriter(statsRepo, measurementService, logsDirPath);
         controller.setStatsRepo(statsRepo);
+        controller.setMeasurementService(measurementService);
+        controller.setStatsWriter(statsWriter);
 
         server = new TCPServer(address, port, controller);
     }
@@ -76,6 +85,7 @@ public class WoCoBalancer {
 
     public void run() {
         try {
+            measurementService.start();
             server.run();
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,6 +99,7 @@ public class WoCoBalancer {
     public void stop() {
         try {
             server.stop();
+            measurementService.stop();
         } catch (IOException e) {
             e.printStackTrace();
         }

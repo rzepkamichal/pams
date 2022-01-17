@@ -1,13 +1,13 @@
 package org.simple.software.stats;
 
-public class ResponseTimeMeasurement {
+public class IntervalMeasurement {
 
     private final long timestamp;
     private final long successCount;
     private final double tput;
     private final double avgResponseTime;
 
-    public ResponseTimeMeasurement(long timestamp, long successCount, double tput, double avgResponseTime) {
+    public IntervalMeasurement(long timestamp, long successCount, double tput, double avgResponseTime) {
         this.timestamp = timestamp;
         this.successCount = successCount;
         this.tput = tput;
@@ -30,7 +30,7 @@ public class ResponseTimeMeasurement {
         return successCount;
     }
 
-    public static ResponseTimeMeasurement empty() {
-        return new ResponseTimeMeasurement(0, 0, 0.0, 0.0);
+    public static IntervalMeasurement empty() {
+        return new IntervalMeasurement(0, 0, 0.0, 0.0);
     }
 }

@@ -8,6 +8,8 @@ import org.simple.software.protocol.Response;
 import org.simple.software.infrastructure.JobExecutor;
 import org.simple.software.stats.InMemoryStatsRepo;
 import org.simple.software.stats.ProcessingStatsRepo;
+import org.simple.software.stats.IntervalMeasurementService;
+import org.simple.software.stats.StatsWriter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -18,6 +20,8 @@ class LBServerController implements ServerController {
     private final TCPClientRepo tcpClientRepo;
 
     private ProcessingStatsRepo<LBStats> statsRepo = new InMemoryStatsRepo<>();
+    private IntervalMeasurementService measurementService = IntervalMeasurementService.EMPTY;
+    private StatsWriter statsWriter = StatsWriter.EMPTY;
 
     public LBServerController(LoadBalancer loadBalancer, JobExecutor jobExecutor, TCPClientRepo tcpClientRepo) {
         this.loadBalancer = loadBalancer;
@@ -34,6 +38,8 @@ class LBServerController implements ServerController {
 
         jobExecutor.execute(() -> {
             Response response = service.serve(request);
+            long systemResponseTime = System.nanoTime() - request.getReadyTime();
+            statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
             futureResponse.complete(response);
         });
 
@@ -55,6 +61,9 @@ class LBServerController implements ServerController {
         // also close all WoCoServer-connections maintained for each client
         tcpClientRepo.getAll().forEach(TCPClient::close);
         tcpClientRepo.removeAll();
+
+        measurementService.stop();
+        statsWriter.writeTotal();
     }
 
     private void logTimeSpentLoadBalancing(Request request) {
@@ -64,5 +73,13 @@ class LBServerController implements ServerController {
 
     public void setStatsRepo(ProcessingStatsRepo<LBStats> statsRepo) {
         this.statsRepo = statsRepo;
+    }
+
+    public void setMeasurementService(IntervalMeasurementService measurementService) {
+        this.measurementService = measurementService;
+    }
+
+    public void setStatsWriter(StatsWriter statsWriter) {
+        this.statsWriter = statsWriter;
     }
 }

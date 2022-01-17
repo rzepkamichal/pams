@@ -2,22 +2,22 @@ package org.simple.software.loadbalancer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.simple.software.stats.ResponseTimeMeasurement;
-import org.simple.software.stats.DefaultResponseTimeMeasurementService;
+import org.simple.software.stats.IntervalMeasurement;
+import org.simple.software.stats.DefaultIntervalMeasurementService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DefaultResponseTimeMeasurementServiceTest {
+class DefaultIntervalMeasurementServiceTest {
 
     LBStatsRepo repo;
 
-    DefaultResponseTimeMeasurementService service;
+    DefaultIntervalMeasurementService service;
 
 
     @BeforeEach
     void setUp() {
         repo = new LBStatsRepo();
-        service = new DefaultResponseTimeMeasurementService(repo, 500);
+        service = new DefaultIntervalMeasurementService(repo, 500);
     }
 
     @Test
@@ -26,7 +26,7 @@ class DefaultResponseTimeMeasurementServiceTest {
         repo.getStatsByClient(1).logTime(LBStats.SYSTEM_RESPONSE_TIME, 10);
         repo.getStatsByClient(2).logTime(LBStats.SYSTEM_RESPONSE_TIME, 20);
 
-        ResponseTimeMeasurement latestMeasurement = service.measureLatestInterval();
+        IntervalMeasurement latestMeasurement = service.measureLatestInterval();
 
         assertEquals(3, latestMeasurement.getSuccessCount());
         assertEquals(60 / 3.0, latestMeasurement.getAvgResponseTime());
@@ -58,7 +58,7 @@ class DefaultResponseTimeMeasurementServiceTest {
         repo.getStatsByClient(1).logTime(LBStats.SYSTEM_RESPONSE_TIME, 10);
         repo.getStatsByClient(2).logTime(LBStats.SYSTEM_RESPONSE_TIME, 20);
 
-        ResponseTimeMeasurement latestMeasurement = service.measureLatestInterval();
+        IntervalMeasurement latestMeasurement = service.measureLatestInterval();
 
         assertEquals(3, latestMeasurement.getSuccessCount());
         assertEquals(60 / 3.0, latestMeasurement.getAvgResponseTime());
@@ -75,7 +75,7 @@ class DefaultResponseTimeMeasurementServiceTest {
         repo.getStatsByClient(1).logTime(LBStats.SYSTEM_RESPONSE_TIME, 10);
         repo.getStatsByClient(2).logTime(LBStats.SYSTEM_RESPONSE_TIME, 20);
 
-        ResponseTimeMeasurement latestMeasurement = service.measureLatestInterval();
+        IntervalMeasurement latestMeasurement = service.measureLatestInterval();
 
         assertEquals(3, latestMeasurement.getSuccessCount());
         assertEquals(60 / 3.0, latestMeasurement.getAvgResponseTime());

@@ -10,13 +10,13 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class DefaultResponseTimeMeasurementService implements ResponseTimeMeasurementService {
+public class DefaultIntervalMeasurementService implements IntervalMeasurementService {
 
     private final int msInteravlLen;
     private final ResponseTimeSource dataSource;
 
     private final Map<Integer, IntervalMeasurementMemo> latestMeasurementHistory = new ConcurrentHashMap<>();
-    private final List<ResponseTimeMeasurement> measurements = Collections.synchronizedList(new LinkedList<>());
+    private final List<IntervalMeasurement> measurements = Collections.synchronizedList(new LinkedList<>());
 
     private final TimerTask task;
     private volatile Timer timer;
@@ -24,14 +24,14 @@ public class DefaultResponseTimeMeasurementService implements ResponseTimeMeasur
     private volatile long startTime = 0L;
     private volatile long latestMeasurementTimestamp = startTime;
 
-    public DefaultResponseTimeMeasurementService(ResponseTimeSource dataSource, int msInteravlLen) {
+    public DefaultIntervalMeasurementService(ResponseTimeSource dataSource, int msInteravlLen) {
         this.msInteravlLen = msInteravlLen;
         this.dataSource = dataSource;
 
         task = new TimerTask() {
             @Override
             public void run() {
-                ResponseTimeMeasurement measurement = measureLatestInterval();
+                IntervalMeasurement measurement = measureLatestInterval();
                 measurements.add(measurement);
             }
         };
@@ -64,12 +64,12 @@ public class DefaultResponseTimeMeasurementService implements ResponseTimeMeasur
     }
 
     @Override
-    public List<ResponseTimeMeasurement> getMeasurements() {
+    public List<IntervalMeasurement> getMeasurements() {
         return Collections.unmodifiableList(measurements);
     }
 
     @Override
-    public ResponseTimeMeasurement measureLatestInterval() {
+    public IntervalMeasurement measureLatestInterval() {
         List<Long> intervalMeasurements = new LinkedList<>();
 
         dataSource.getClientIds().stream()
@@ -87,7 +87,7 @@ public class DefaultResponseTimeMeasurementService implements ResponseTimeMeasur
                 .average()
                 .orElse(0);
 
-        ResponseTimeMeasurement measurement = new ResponseTimeMeasurement(timestamp, successCount, tput, avgResponseTime);
+        IntervalMeasurement measurement = new IntervalMeasurement(timestamp, successCount, tput, avgResponseTime);
 
         return measurement;
     }

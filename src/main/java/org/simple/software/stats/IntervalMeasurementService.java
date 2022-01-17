@@ -3,15 +3,15 @@ package org.simple.software.stats;
 import java.util.Collections;
 import java.util.List;
 
-public interface ResponseTimeMeasurementService {
+public interface IntervalMeasurementService {
 
     void start();
     void stop();
-    List<ResponseTimeMeasurement> getMeasurements();
-    ResponseTimeMeasurement measureLatestInterval();
+    List<IntervalMeasurement> getMeasurements();
+    IntervalMeasurement measureLatestInterval();
     long getStartTimestamp();
 
-    ResponseTimeMeasurementService EMPTY = new ResponseTimeMeasurementService() {
+    IntervalMeasurementService EMPTY = new IntervalMeasurementService() {
         @Override
         public void start() {
         }
@@ -21,13 +21,13 @@ public interface ResponseTimeMeasurementService {
         }
 
         @Override
-        public List<ResponseTimeMeasurement> getMeasurements() {
+        public List<IntervalMeasurement> getMeasurements() {
             return Collections.emptyList();
         }
 
         @Override
-        public ResponseTimeMeasurement measureLatestInterval() {
-            return ResponseTimeMeasurement.empty();
+        public IntervalMeasurement measureLatestInterval() {
+            return IntervalMeasurement.empty();
         }
 
         @Override
