@@ -27,6 +27,8 @@ public class WoCoServerController implements ServerController {
     private ProcessingStatsRepo<ServerStats> statsRepo = new InMemoryStatsRepo<>();
     private StatsWriter statsWriter = StatsWriter.EMPTY;
 
+    private boolean firstRequest = true;
+
     public WoCoServerController(JobExecutor jobExecutor, TagRemover tagRemover,
                                 WordCounter wordCounter, ResultSerializer serializer) {
         this.jobExecutor = jobExecutor;
@@ -37,6 +39,11 @@ public class WoCoServerController implements ServerController {
 
     @Override
     public CompletableFuture<Response> handle(Request request) {
+        if (firstRequest) {
+            firstRequest = false;
+            measurementSvc.start();
+        }
+
         getClientStats(request.getClientId()).logTime(ServerStats.RECEIVE_TIME, request.getReceiveDuration());
 
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();

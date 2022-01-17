@@ -114,7 +114,8 @@ public class TCPServer {
                         controller.onDisconnect(clientId);
 
                         if (noClientBeingServed()) {
-                            scheduleIdleTimeout();
+                            controller.onIdle();
+                            //scheduleIdleTimeout();
                         }
                     }
                 }
@@ -131,7 +132,7 @@ public class TCPServer {
 
     private void scheduleIdleTimeout() {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.schedule(this::onIdleTimeout, 200, TimeUnit.MILLISECONDS);
+        executorService.schedule(this::onIdleTimeout, 50, TimeUnit.MILLISECONDS);
     }
 
     private void onIdleTimeout() {

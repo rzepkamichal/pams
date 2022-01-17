@@ -78,7 +78,6 @@ public class WoCoServer {
 
     public void run() {
         try {
-            measurementService.start();
             tcpServer.run();
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -23,6 +23,8 @@ class LBServerController implements ServerController {
     private IntervalMeasurementService measurementService = IntervalMeasurementService.EMPTY;
     private StatsWriter statsWriter = StatsWriter.EMPTY;
 
+    private boolean firstRequest = true;
+
     public LBServerController(LoadBalancer loadBalancer, JobExecutor jobExecutor, TCPClientRepo tcpClientRepo) {
         this.loadBalancer = loadBalancer;
         this.jobExecutor = jobExecutor;
@@ -31,6 +33,12 @@ class LBServerController implements ServerController {
 
     @Override
     public CompletableFuture<Response> handle(Request request) {
+
+        if (firstRequest) {
+            firstRequest = false;
+            measurementService.start();
+        }
+
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();
         BackendService service = loadBalancer.getNext();
 

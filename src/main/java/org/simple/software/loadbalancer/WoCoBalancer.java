@@ -85,7 +85,6 @@ public class WoCoBalancer {
 
     public void run() {
         try {
-            measurementService.start();
             server.run();
         } catch (IOException e) {
             e.printStackTrace();
