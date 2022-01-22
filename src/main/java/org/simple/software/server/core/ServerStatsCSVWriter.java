@@ -77,13 +77,14 @@ public class ServerStatsCSVWriter implements StatsWriter {
         double avgResponseTime = statsRepo.getAcummulativeStats().getAvg(RESPONSE_TIME);
         double totalTime = getTotalTime();
         double totalTput = getTotalTput(totalTime);
+        int successCount = statsRepo.getAcummulativeStats().getAllRecords(RESPONSE_TIME).size();
 
         Record record = new Record(avgReceiveTime, avgTagRemovalTime, avgWordCountTime,
                 avgSerializationTime, avgResponseTime, totalTime, totalTput);
 
         String header = ATTR_RECEIVE_TIME + CSV.SEPARATOR + ATTR_TAG_REMOVAL_TIME + CSV.SEPARATOR
                 + ATTR_WORD_COUNT_TIME + CSV.SEPARATOR + ATTR_SERIALIZATION_TIME + CSV.SEPARATOR
-                + ATTR_RESPONSE_TIME + CSV.SEPARATOR + ATTRIB_TIME + CSV.SEPARATOR + ATTRIB_TPUT;
+                + ATTR_RESPONSE_TIME + CSV.SEPARATOR + ATTRIB_TIME + CSV.SEPARATOR + ATTRIB_TPUT + CSV.SEPARATOR + successCount;
         CSV.writeToFile(logsDirPath, FILE_AVG_STATS, header, List.of(record), this::processStatRecordToCSVLineWithTput);
     }
 
