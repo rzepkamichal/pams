@@ -39,6 +39,10 @@ public class WoCoServerController implements ServerController {
 
     @Override
     public CompletableFuture<Response> handle(Request request) {
+        if (!request.isDataReady()) {
+            return CompletableFuture.completedFuture(Response.of(""));
+        }
+
         if (firstRequest) {
             firstRequest = false;
             measurementSvc.start();

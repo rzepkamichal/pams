@@ -4,6 +4,7 @@ public interface Request {
 
     int getClientId();
     String getData();
+    String getRecentChunk();
     void receiveData(String dataChunk);
     boolean isDataReady();
 

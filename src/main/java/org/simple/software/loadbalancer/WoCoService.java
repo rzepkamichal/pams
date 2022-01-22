@@ -32,9 +32,20 @@ public class WoCoService implements BackendService {
     @Override
     public Response serve(Request request) {
         try {
-            TCPClient tcpClient = repo.getOrCreate(request.getClientId(), () -> new TCPClient(address, port));
-            String resp = tcpClient.send(request.getData());
-            return Response.of(resp);
+            TCPClient tcpClient = repo.getOrCreate(request.getClientId() + port, () -> new TCPClient(address, port));
+
+            String requestData = request.getRecentChunk();
+            Response response;
+
+            if (request.isDataReady()) {
+                response = Response.of(tcpClient.send(requestData));
+            } else {
+                tcpClient.sendNonBlocking(requestData);
+                response = Response.of("");
+            }
+
+            return response;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -1,5 +1,6 @@
 package org.simple.software.loadbalancer;
 
+import org.junit.platform.commons.util.StringUtils;
 import org.simple.software.infrastructure.ServerController;
 import org.simple.software.infrastructure.TCPClient;
 import org.simple.software.infrastructure.TCPClientRepo;
@@ -11,7 +12,9 @@ import org.simple.software.stats.ProcessingStatsRepo;
 import org.simple.software.stats.IntervalMeasurementService;
 import org.simple.software.stats.StatsWriter;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 class LBServerController implements ServerController {
 
@@ -24,6 +27,8 @@ class LBServerController implements ServerController {
     private StatsWriter statsWriter = StatsWriter.EMPTY;
 
     private boolean firstRequest = true;
+
+    private final Map<Integer, BackendService> serviceMap = new ConcurrentHashMap<>();
 
     public LBServerController(LoadBalancer loadBalancer, JobExecutor jobExecutor, TCPClientRepo tcpClientRepo) {
         this.loadBalancer = loadBalancer;
@@ -39,8 +44,13 @@ class LBServerController implements ServerController {
             measurementService.start();
         }
 
+        if (serviceMap.get(request.getClientId()) == null) {
+            BackendService service = loadBalancer.getNext();
+            serviceMap.put(request.getClientId(), service);
+        }
+
+        BackendService service = serviceMap.get(request.getClientId());
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();
-        BackendService service = loadBalancer.getNext();
 
         logTimeSpentLoadBalancing(request);
 
@@ -48,7 +58,12 @@ class LBServerController implements ServerController {
             Response response = service.serve(request);
             long systemResponseTime = System.nanoTime() - request.getReceiveTime();
             statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
-            futureResponse.complete(response);
+            serviceMap.remove(request.getClientId());
+
+            if (StringUtils.isNotBlank(response.getData())) {
+                futureResponse.complete(response);
+            }
+
         });
 
         return futureResponse;

@@ -1,5 +1,6 @@
 package org.simple.software.infrastructure;
 
+import org.junit.platform.commons.util.StringUtils;
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.RequestFactory;
 import org.simple.software.protocol.Response;
@@ -96,6 +97,9 @@ public class TCPServer {
                         String dataChunk = new String(bb.array(), 0, readCnt);
                         request.receiveData(dataChunk);
 
+                        controller.handle(request)
+                                .thenAccept(response -> sendResponse(client, request, response));
+
                         if (request.isDataReady()) {
 
                             if (DEBUG) {
@@ -103,8 +107,6 @@ public class TCPServer {
                             }
 
                             pendingRequestRepo.removeByClientId(clientId);
-                            controller.handle(request)
-                                    .thenAccept(response -> sendResponse(client, request, response));
                         }
 
                     } else {
@@ -163,6 +165,9 @@ public class TCPServer {
     }
 
     private void sendResponse(SocketChannel client, Request request, Response response) {
+        if (StringUtils.isBlank(response.getData())) {
+            return;
+        }
 
         String rawResponse = response.getData() + "\n";
         ByteBuffer ba = ByteBuffer.wrap(rawResponse.getBytes());

@@ -43,6 +43,19 @@ public class TCPClient {
         return response;
     }
 
+    public void sendNonBlocking(String data) throws IOException {
+
+        if (!initialized.get()) {
+            initialize();
+        }
+
+        // remove all characters from the data, which belong to the protocol's semantics
+        data = data.replaceAll(Const.REQUEST_SEPARATOR_REGEXP, "");
+
+        sOutput.write(data);
+        sOutput.flush();
+    }
+
     private void initialize() {
         try {
             this.sHandle = new Socket(serverAddress, serverPort);
