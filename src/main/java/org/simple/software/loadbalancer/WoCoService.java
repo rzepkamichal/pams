@@ -1,5 +1,6 @@
 package org.simple.software.loadbalancer;
 
+import org.simple.software.infrastructure.StringUtils;
 import org.simple.software.infrastructure.TCPClient;
 import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.protocol.Request;
@@ -33,17 +34,8 @@ public class WoCoService implements BackendService {
     public Response serve(Request request) {
         try {
             TCPClient tcpClient = repo.getOrCreate(request.getClientId() + port, () -> new TCPClient(address, port));
-
-            String requestData = request.getRecentChunk();
-            Response response;
-
-            if (request.isDataReady()) {
-                response = Response.of(tcpClient.send(requestData));
-            } else {
-                tcpClient.sendNonBlocking(requestData);
-                response = Response.of("");
-            }
-
+            String requestData = request.getData();
+            Response response = Response.of(tcpClient.send(requestData));
             return response;
 
         } catch (IOException e) {

@@ -96,10 +96,9 @@ public class TCPServer {
                         String dataChunk = new String(bb.array(), 0, readCnt);
                         request.receiveData(dataChunk);
 
-                        controller.handle(request)
-                                .thenAccept(response -> sendResponse(client, request, response));
-
                         if (request.isDataReady()) {
+                            controller.handle(request)
+                                    .thenAccept(response -> sendResponse(client, request, response));
 
                             if (DEBUG) {
                                 log.info(port + " serving \"" + request.getData() + "\" for " + clientId);

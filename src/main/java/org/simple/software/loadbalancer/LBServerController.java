@@ -44,12 +44,7 @@ class LBServerController implements ServerController {
             measurementService.start();
         }
 
-        if (serviceMap.get(request.getClientId()) == null) {
-            BackendService service = loadBalancer.getNext();
-            serviceMap.put(request.getClientId(), service);
-        }
-
-        BackendService service = serviceMap.get(request.getClientId());
+        BackendService service = loadBalancer.getNext();
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();
 
         logTimeSpentLoadBalancing(request);
@@ -58,11 +53,7 @@ class LBServerController implements ServerController {
             Response response = service.serve(request);
             long systemResponseTime = System.nanoTime() - request.getReceiveTime();
             statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
-
-            if (!StringUtils.isBlank(response.getData())) {
-                serviceMap.remove(request.getClientId());
-                futureResponse.complete(response);
-            }
+            futureResponse.complete(response);
 
         });
 
