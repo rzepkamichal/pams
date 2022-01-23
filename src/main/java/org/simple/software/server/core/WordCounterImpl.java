@@ -11,11 +11,6 @@ public class WordCounterImpl implements WordCounter {
      */
     @Override
     public WoCoResult countWords(String document) {
-        long sleepTime = 5 * 1000000L;
-        long startTime = System.nanoTime();
-
-        while(System.nanoTime() < startTime + sleepTime){
-        }
 
         String ucLine = document.toLowerCase();
         StringBuilder asciiLine = new StringBuilder();
