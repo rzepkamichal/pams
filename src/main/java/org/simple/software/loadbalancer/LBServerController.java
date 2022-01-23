@@ -1,7 +1,7 @@
 package org.simple.software.loadbalancer;
 
-import org.junit.platform.commons.util.StringUtils;
 import org.simple.software.infrastructure.ServerController;
+import org.simple.software.infrastructure.StringUtils;
 import org.simple.software.infrastructure.TCPClient;
 import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.protocol.Request;
@@ -60,7 +60,7 @@ class LBServerController implements ServerController {
             statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
             serviceMap.remove(request.getClientId());
 
-            if (StringUtils.isNotBlank(response.getData())) {
+            if (!StringUtils.isBlank(response.getData())) {
                 futureResponse.complete(response);
             }
 

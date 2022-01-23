@@ -1,6 +1,5 @@
 package org.simple.software.infrastructure;
 
-import org.junit.platform.commons.util.StringUtils;
 import org.simple.software.protocol.Request;
 import org.simple.software.protocol.RequestFactory;
 import org.simple.software.protocol.Response;
