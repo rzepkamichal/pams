@@ -58,9 +58,9 @@ class LBServerController implements ServerController {
             Response response = service.serve(request);
             long systemResponseTime = System.nanoTime() - request.getReceiveTime();
             statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
-            serviceMap.remove(request.getClientId());
 
             if (!StringUtils.isBlank(response.getData())) {
+                serviceMap.remove(request.getClientId());
                 futureResponse.complete(response);
             }
 
