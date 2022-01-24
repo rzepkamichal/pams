@@ -97,12 +97,12 @@ public class TCPServer {
                         request.receiveData(dataChunk);
 
                         if (request.isDataReady()) {
-                            controller.handle(request)
-                                    .thenAccept(response -> sendResponse(client, request, response));
-
                             if (DEBUG) {
                                 log.info(port + " serving \"" + request.getData() + "\" for " + clientId);
                             }
+
+                            controller.handle(request)
+                                    .thenAccept(response -> sendResponse(client, request, response));
 
                             pendingRequestRepo.removeByClientId(clientId);
                         }
@@ -163,10 +163,6 @@ public class TCPServer {
     }
 
     private void sendResponse(SocketChannel client, Request request, Response response) {
-        if (StringUtils.isBlank(response.getData())) {
-            return;
-        }
-
         String rawResponse = response.getData() + "\n";
         ByteBuffer ba = ByteBuffer.wrap(rawResponse.getBytes());
         try {

@@ -8,21 +8,21 @@ import java.util.function.Supplier;
 
 public class InMemoryTCPClientRepo implements TCPClientRepo {
 
-    private final Map<Integer, TCPClient> clients = new ConcurrentHashMap<>();
+    private final Map<String, TCPClient> clients = new ConcurrentHashMap<>();
 
     @Override
-    public Optional<TCPClient> get(int clientId) {
-        return Optional.ofNullable(clients.get(clientId));
+    public Optional<TCPClient> get(String id) {
+        return Optional.ofNullable(clients.get(id));
     }
 
     @Override
-    public TCPClient getOrCreate(int clientId, Supplier<TCPClient> clientSupplier) {
+    public TCPClient getOrCreate(String id, Supplier<TCPClient> clientSupplier) {
 
-        TCPClient client = clients.get(clientId);
+        TCPClient client = clients.get(id);
 
         if (client == null) {
             client = clientSupplier.get();
-            clients.put(clientId, client);
+            clients.put(id, client);
         }
 
         return client;
@@ -39,7 +39,7 @@ public class InMemoryTCPClientRepo implements TCPClientRepo {
     }
 
     @Override
-    public void removeByClientId(int clientId) {
-        clients.remove(clientId);
+    public void removeById(String id) {
+        clients.remove(id);
     }
 }

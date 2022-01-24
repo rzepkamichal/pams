@@ -39,24 +39,20 @@ public class WoCoServerController implements ServerController {
 
     @Override
     public CompletableFuture<Response> handle(Request request) {
-        if (!request.isDataReady()) {
-            return CompletableFuture.completedFuture(Response.of(""));
-        }
-
         if (firstRequest) {
             firstRequest = false;
             measurementSvc.start();
         }
 
-        getClientStats(request.getClientId()).logTime(ServerStats.RECEIVE_TIME, request.getReceiveDuration());
+        logReceiveTime(request);
 
         CompletableFuture<Response> futureResponse = new CompletableFuture<>();
 
         WoCoJob job = createJob(request);
         job.setOnComplete(result -> {
-            futureResponse.complete(resultToResponse(result));
-            long totalResponseTime = System.nanoTime() - request.getReceiveTime();
-            getClientStats(request.getClientId()).logTime(ServerStats.RESPONSE_TIME, totalResponseTime);
+            Response response = resultToResponse(result);
+            logResponseTime(request);
+            futureResponse.complete(response);
         });
 
         jobExecutor.execute(job);
@@ -92,6 +88,16 @@ public class WoCoServerController implements ServerController {
                 time -> getClientStats(result.getClientId()).logTime(ServerStats.RESPONSE_SERIALIZATION_TIME, time));
 
         return Response.of(responseData);
+    }
+
+    private void logReceiveTime(Request request) {
+        getClientStats(request.getClientId())
+                .logTime(ServerStats.RECEIVE_TIME, request.getReceiveDuration());
+    }
+
+    private void logResponseTime(Request request) {
+        long totalResponseTime = System.nanoTime() - request.getReceiveTime();
+        getClientStats(request.getClientId()).logTime(ServerStats.RESPONSE_TIME, totalResponseTime);
     }
 
     private ProcessingStats<ServerStats> getClientStats(int clientId) {

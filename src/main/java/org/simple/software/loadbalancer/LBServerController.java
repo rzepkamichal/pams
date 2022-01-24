@@ -1,7 +1,6 @@
 package org.simple.software.loadbalancer;
 
 import org.simple.software.infrastructure.ServerController;
-import org.simple.software.infrastructure.StringUtils;
 import org.simple.software.infrastructure.TCPClient;
 import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.protocol.Request;
@@ -12,9 +11,7 @@ import org.simple.software.stats.ProcessingStatsRepo;
 import org.simple.software.stats.IntervalMeasurementService;
 import org.simple.software.stats.StatsWriter;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 class LBServerController implements ServerController {
 
@@ -27,8 +24,6 @@ class LBServerController implements ServerController {
     private StatsWriter statsWriter = StatsWriter.EMPTY;
 
     private boolean firstRequest = true;
-
-    private final Map<Integer, BackendService> serviceMap = new ConcurrentHashMap<>();
 
     public LBServerController(LoadBalancer loadBalancer, JobExecutor jobExecutor, TCPClientRepo tcpClientRepo) {
         this.loadBalancer = loadBalancer;
@@ -51,25 +46,13 @@ class LBServerController implements ServerController {
 
         jobExecutor.execute(() -> {
             Response response = service.serve(request);
-            long systemResponseTime = System.nanoTime() - request.getReceiveTime();
-            statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
+            logSystemResponseTime(request);
             futureResponse.complete(response);
-
         });
 
         return futureResponse;
     }
-
-    @Override
-    public void onDisconnect(int clientId) {
-        // also close the WoCoServer-connection associated with the disconnected client
-        tcpClientRepo.get(clientId)
-                .ifPresent(tcpClient -> {
-                    tcpClient.close();
-                    tcpClientRepo.removeByClientId(clientId);
-                });
-    }
-
+    
     @Override
     public void onIdle() {
         // also close all WoCoServer-connections maintained for each client
@@ -83,6 +66,11 @@ class LBServerController implements ServerController {
     private void logTimeSpentLoadBalancing(Request request) {
         long total = System.nanoTime() - request.getReadyTime() + request.getReceiveDuration();
         statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.TIME_SPENT_IN_LB, total);
+    }
+
+    private void logSystemResponseTime(Request request) {
+        long systemResponseTime = System.nanoTime() - request.getReceiveTime();
+        statsRepo.getStatsByClient(request.getClientId()).logTime(LBStats.SYSTEM_RESPONSE_TIME, systemResponseTime);
     }
 
     public void setStatsRepo(ProcessingStatsRepo<LBStats> statsRepo) {

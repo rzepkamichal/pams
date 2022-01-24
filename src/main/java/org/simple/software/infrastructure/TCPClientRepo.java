@@ -8,7 +8,7 @@ public interface TCPClientRepo {
 
     Collection<TCPClient> getAll();
     void removeAll();
-    void removeByClientId(int clientId);
-    TCPClient getOrCreate(int clientId, Supplier<TCPClient> clientSupplier);
-    Optional<TCPClient> get(int clientId);
+    void removeById(String id);
+    TCPClient getOrCreate(String id, Supplier<TCPClient> clientSupplier);
+    Optional<TCPClient> get(String id);
 }

@@ -1,6 +1,5 @@
 package org.simple.software.loadbalancer;
 
-import org.simple.software.infrastructure.StringUtils;
 import org.simple.software.infrastructure.TCPClient;
 import org.simple.software.infrastructure.TCPClientRepo;
 import org.simple.software.protocol.Request;
@@ -25,7 +24,7 @@ public class WoCoService implements BackendService {
     }
 
     // The backend services use a shared repo of TCPClients.
-    // The load balancer maintains a separate TCPClient (socket) for each WoCoClient.
+    // The load balancer maintains a separate TCPClient (socket) for each pair (WoCoClient, Backend Server).
     // It enables forwarding WoCoClient requests on separate channels to the backend servers,
     // rather than using a shared channel. In this way, the WoCoServers can recognise connections from different clients.
     // Otherwise, the WoCoServers would get only a single-channel connection from the LB
@@ -33,13 +32,22 @@ public class WoCoService implements BackendService {
     @Override
     public Response serve(Request request) {
         try {
-            TCPClient tcpClient = repo.getOrCreate(request.getClientId() + port, () -> new TCPClient(address, port));
             String requestData = request.getData();
+
+            String tcpClientId = getTCPClientId(request);
+            TCPClient tcpClient = repo.getOrCreate(tcpClientId, () -> new TCPClient(address, port));
+
             Response response = Response.of(tcpClient.send(requestData));
+
             return response;
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // unique TCP client per pair (WoCoClient, Backend Server)
+    private String getTCPClientId(Request request) {
+        return request.getClientId() + address + port;
     }
 }

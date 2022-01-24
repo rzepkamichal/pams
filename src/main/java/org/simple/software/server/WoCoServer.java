@@ -22,7 +22,7 @@ import java.io.IOException;
 public class WoCoServer {
 
     public static final char SEPARATOR = '$';
-    public static final int MEASUREMENT_INTERVAL_MS = 200;
+    public static final int MEASUREMENT_INTERVAL_MS = 250;
 
     private final TagRemover tagRemover;
     private final WordCounter wordCounter = new WordCounterImpl();

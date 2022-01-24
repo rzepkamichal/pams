@@ -18,13 +18,15 @@ import java.util.stream.Collectors;
 public class WoCoBalancer {
 
     private static final Logger log = Logger.getLogger(WoCoBalancer.class.getName());
+    public static final int MEASUREMENT_INTERVAL_MS = 250;
+    public static final String LOG_DIR_NAME = "." + File.separator + "log-loadbalancer";
 
     private final TCPServer server;
     private final DefaultIntervalMeasurementService measurementService;
     private final StatsWriter statsWriter;
 
     // The backend services use a shared repo of TCPClients.
-    // The load balancer maintains a separate TCPClient (socket) for each WoCoClient.
+    // The load balancer maintains a separate TCPClient (socket) for each pair (WoCoClient, Backend Server).
     // It enables forwarding WoCoClient requests on separate channels to the backend servers,
     // rather than using a shared channel. In this way, the WoCoServers can recognise connections from different clients.
     // Otherwise, the WoCoServers would get only a single-channel connection from the LB
@@ -38,10 +40,9 @@ public class WoCoBalancer {
                 tcpClientRepo);
 
         LBStatsRepo statsRepo = new LBStatsRepo();
-        measurementService = new DefaultIntervalMeasurementService(statsRepo, 200);
+        measurementService = new DefaultIntervalMeasurementService(statsRepo, MEASUREMENT_INTERVAL_MS);
+        statsWriter = new LBStatsCSVWriter(statsRepo, measurementService, LOG_DIR_NAME);
 
-        String logsDirPath = "." + File.separator + "log-loadbalancer";
-        statsWriter = new LBStatsCSVWriter(statsRepo, measurementService, logsDirPath);
         controller.setStatsRepo(statsRepo);
         controller.setMeasurementService(measurementService);
         controller.setStatsWriter(statsWriter);

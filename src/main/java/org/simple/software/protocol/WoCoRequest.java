@@ -15,8 +15,6 @@ public class WoCoRequest implements Request {
 
     private long receiveTime;
 
-    private String recentChunk = "";
-
     private Consumer<Long> receiveDurationListener = __ -> {};
 
     WoCoRequest(int clientId, String initialDataChunk) {
@@ -56,8 +54,6 @@ public class WoCoRequest implements Request {
     @Override
     public void receiveData(String dataChunk) {
 
-        recentChunk = dataChunk;
-
         if (dataChunk.isEmpty()) {
             return;
         }
@@ -85,11 +81,6 @@ public class WoCoRequest implements Request {
         requestSeparatorReceived = true;
         receiveTime = System.nanoTime() - creationTime;
         readyTime = System.nanoTime();
-    }
-
-    @Override
-    public String getRecentChunk() {
-        return recentChunk;
     }
 
     @Override
