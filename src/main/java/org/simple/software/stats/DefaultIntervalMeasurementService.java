@@ -71,8 +71,8 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
     @Override
     public long getLastMeasurementTimestamp() {
         // cutoff trailing zeros from the calculation
-        // and take the timestamp at which the first zero occurred, after which there were zeros only
-        return latestNonZeroMeasurementTimestamp + (long) (msInteravlLen * 1000L * TimedRunner.PRECISION);
+        // and take the timestamp at which the last non-zero value occurred, after which there were zeros only
+        return latestNonZeroMeasurementTimestamp;
     }
 
     @Override
