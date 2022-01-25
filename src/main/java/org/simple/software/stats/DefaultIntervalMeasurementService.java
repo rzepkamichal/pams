@@ -23,6 +23,7 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
 
     private volatile long startTime = 0L;
     private volatile long latestMeasurementTimestamp = startTime;
+    private volatile long latestNonZeroMeasurementTimestamp = 0L;
 
     public DefaultIntervalMeasurementService(ResponseTimeSource dataSource, int msInteravlLen) {
         this.msInteravlLen = msInteravlLen;
@@ -33,6 +34,10 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
             public void run() {
                 IntervalMeasurement measurement = measureLatestInterval();
                 measurements.add(measurement);
+
+                if (measurement.getTput() > 0 || measurement.getAvgResponseTime() > 0) {
+                    latestNonZeroMeasurementTimestamp = System.nanoTime();
+                }
             }
         };
     }
@@ -65,7 +70,9 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
 
     @Override
     public long getLastMeasurementTimestamp() {
-        return latestMeasurementTimestamp;
+        // cutoff trailing zeros from the calculation
+        // and take the timestamp at which the first zero occurred, after which there were zeros only
+        return latestNonZeroMeasurementTimestamp + (long) (msInteravlLen * 1000L * TimedRunner.PRECISION);
     }
 
     @Override
@@ -76,18 +83,22 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
 
     @Override
     public IntervalMeasurement measureLatestInterval() {
-        List<Long> intervalMeasurements = new LinkedList<>();
 
+        // get measurement records from the latest interval for each client and merge them into one list
+        List<Long> intervalMeasurements = new LinkedList<>();
         dataSource.getClientIds().stream()
                 .map(this::getLatestIntervalByClient)
                 .collect(Collectors.toList())
                 .forEach(intervalMeasurements::addAll);
 
+        // calculate throughput for the latest interval
         long timestamp = System.nanoTime();
         long elapsedTime = timestamp - latestMeasurementTimestamp;
         latestMeasurementTimestamp = timestamp;
         long successCount = intervalMeasurements.size();
         double tput = 1.0 * successCount / elapsedTime;
+
+        // calculate avg response time for the latest interval
         double avgResponseTime = intervalMeasurements.stream()
                 .mapToDouble(Long::doubleValue)
                 .average()
@@ -98,6 +109,13 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
         return measurement;
     }
 
+    /**
+     * Gets the measurement records from the data source,
+     * which have been added since the last measurement
+     *
+     * @param clientId the client whose records will be looked up
+     * @return a list of new measurement records since last measurement
+     */
     private List<Long> getLatestIntervalByClient(int clientId) {
         IntervalMeasurementMemo prevMeasurement = Optional.ofNullable(latestMeasurementHistory.get(clientId))
                 .orElseGet(() -> new IntervalMeasurementMemo(0));
@@ -110,7 +128,6 @@ public class DefaultIntervalMeasurementService implements IntervalMeasurementSer
         }
 
         IntervalMeasurementMemo currentMeasurement = new IntervalMeasurementMemo(currentSize);
-
         latestMeasurementHistory.put(clientId, currentMeasurement);
 
         return allClientResponseTimeRecords.subList(prevMeasurement.listSize(), allClientResponseTimeRecords.size());
