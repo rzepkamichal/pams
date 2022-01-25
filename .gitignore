@@ -30,3 +30,7 @@ out/
 log/
 log*/
 .Rproj.user
+.RData
+.Rhistory
+*.csv
+*.Rproj
