@@ -28,30 +28,31 @@ m = 2
 mu = 1260
 
 results <- lapply(loadedRecords, mmmQ_ert, m = m, mu = mu)
-write.csv(results, "output.csv", row.names = FALSE)
+#write.csv(results, "output.csv", row.names = FALSE)
 
 
 mva <- function() {
   
   # number of clients
-  N = 5
-  servers <- c("fixed_capacity", "load_dependent")
+  N = 64
+  servers <- c("fixed_capacity", "load_dependent", "load_dependent")
   
   M = length(servers)
   Q <- c(0)
-  P <- list(c(1), c(1))
+  P <- list(c(1), c(1), c(1))
   
   # fixed capacity: mean service time
-  S <- c(0.26, 0)
+  S <- c(0.00017, 0, 0)
   
+  mu = 1800
   # service rate: load dependent server
-  u <- list(c(0), c(0.32, 0.39, 0.42))
+  u <- list(c(0), c(mu, 2 * mu), c(mu, 2 * mu))
   
   # num of visits to i-th device
-  Vi <- c(6, 1)
+  Vi <- c(1, 0.5, 0.5)
   
   # thinking time
-  Z = 0
+  Z = 0.001
   
   # system response time
   R = 0
@@ -62,11 +63,16 @@ mva <- function() {
   # system throughput
   X = 0
   
+  # stores system throughput for each iteration
+  tputs <- c()
+
+  
   # throughput of i-th device
   Xi <- c(0)
   
   # utilization of i-th device
   Ui <- c(0)
+  
   
   for (i in 1:M) { 
     Q[i] = 0
@@ -88,8 +94,8 @@ mva <- function() {
       
         for (j in 1 : n) {
           
+          # if n exceeds u[], then get last element from u
           uij = 1
-          
           if (j <= length(u[[i]])) {
             uij = u[[i]][[j]]  
           } else {
@@ -122,11 +128,11 @@ mva <- function() {
         Q[i] = X * Vi[i] * Ri[i]
         
       } else if (servers[i] == "load_dependent") {
-        print("")
         for (j in n:1) {
           
-          uij = 1
           
+          # if n exceeds u[], then get last element from u
+          uij = 1
           if (j <= length(u[[i]])) {
             uij = u[[i]][[j]]  
           } else {
@@ -134,7 +140,6 @@ mva <- function() {
           }
           
           P[[i]][[j + 1]] = (X / uij) * P[[i]][[j]]
-          print(uij)
         }
         
         sum = 0
@@ -164,16 +169,25 @@ mva <- function() {
       }
     }
     
-    #print(Ri)
-    #print(R)
+    #print("")
+    #print(Ri * 1000)
+    #print(R * 1000)
     #print(X)
+    #print(Xi)
     #print(Ui)
   
+    if ((n != 15 && n <= 16) || n == 18 || n == 24 || n == 32 || n == 64) {
+      
+      tputs = append(tputs, R * 1000 + 0.3)
+    }
+    
     
   }
   
-
+  tputs
   
 }
 
-print(mva())
+print (mva())
+
+write.csv(mva(), "output.csv", row.names = FALSE)
