@@ -28,6 +28,7 @@ public class WoCoServerController implements ServerController {
     private StatsWriter statsWriter = StatsWriter.EMPTY;
 
     private boolean firstRequest = true;
+    private long lastRequestTimestamp = 0;
 
     public WoCoServerController(JobExecutor jobExecutor, TagRemover tagRemover,
                                 WordCounter wordCounter, ResultSerializer serializer) {
@@ -42,6 +43,10 @@ public class WoCoServerController implements ServerController {
         if (firstRequest) {
             firstRequest = false;
             measurementSvc.start();
+            lastRequestTimestamp = System.nanoTime();
+        } else {
+            logInterarrivalTime(request);
+            lastRequestTimestamp = System.nanoTime();
         }
 
         logReceiveTime(request);
@@ -100,6 +105,11 @@ public class WoCoServerController implements ServerController {
         getClientStats(request.getClientId()).logTime(ServerStats.RESPONSE_TIME, totalResponseTime);
     }
 
+    private void logInterarrivalTime(Request request) {
+        getClientStats(request.getClientId())
+                .logTime(ServerStats.INTERARRIVAL_TIME, System.nanoTime() - lastRequestTimestamp);
+    }
+
     private ProcessingStats<ServerStats> getClientStats(int clientId) {
         return statsRepo.getStatsByClient(clientId);
     }
@@ -115,4 +125,5 @@ public class WoCoServerController implements ServerController {
     public void setMeasurementSvc(IntervalMeasurementService measurementSvc) {
         this.measurementSvc = measurementSvc;
     }
+
 }
