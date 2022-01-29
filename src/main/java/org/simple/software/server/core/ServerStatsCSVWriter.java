@@ -158,7 +158,7 @@ public class ServerStatsCSVWriter implements StatsWriter {
         double totalTime = doubleNanoTimeToSec(record.getTotalTime());
         double totalTput = doubleFreqPerNanoToFreqPerSec(record.getTotalTput());
 
-        return String.format(Locale.US, "%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f",
+        return String.format(Locale.US, "%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f%s%.2f",
                 receiveTime, CSV.SEPARATOR,
                 tagRemovalTime, CSV.SEPARATOR,
                 wordCountTime, CSV.SEPARATOR,
